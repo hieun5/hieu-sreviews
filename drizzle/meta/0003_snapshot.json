@@ -1,0 +1,1125 @@
+{
+  "id": "63c3d42a-c47e-449f-8796-710bb583f862",
+  "prevId": "e11a99b1-2b57-4336-8173-40b35a8d7d20",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.profiles": {
+      "name": "profiles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "initials": {
+          "name": "initials",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "avatar": {
+          "name": "avatar",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "profile_name_nonempty": {
+          "name": "profile_name_nonempty",
+          "value": "length(trim(\"profiles\".\"name\")) > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.recommendation_attendees": {
+      "name": "recommendation_attendees",
+      "schema": "",
+      "columns": {
+        "run_id": {
+          "name": "run_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "profile_id": {
+          "name": "profile_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "recommendation_attendees_run_id_recommendation_runs_id_fk": {
+          "name": "recommendation_attendees_run_id_recommendation_runs_id_fk",
+          "tableFrom": "recommendation_attendees",
+          "tableTo": "recommendation_runs",
+          "columnsFrom": [
+            "run_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "recommendation_attendees_profile_id_profiles_id_fk": {
+          "name": "recommendation_attendees_profile_id_profiles_id_fk",
+          "tableFrom": "recommendation_attendees",
+          "tableTo": "profiles",
+          "columnsFrom": [
+            "profile_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "recommendation_attendees_run_id_profile_id_pk": {
+          "name": "recommendation_attendees_run_id_profile_id_pk",
+          "columns": [
+            "run_id",
+            "profile_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.recommendation_feedback": {
+      "name": "recommendation_feedback",
+      "schema": "",
+      "columns": {
+        "run_id": {
+          "name": "run_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "profile_id": {
+          "name": "profile_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "result_id": {
+          "name": "result_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "choice": {
+          "name": "choice",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "recommendation_feedback_link_identity": {
+          "name": "recommendation_feedback_link_identity",
+          "columns": [
+            {
+              "expression": "run_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "profile_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "result_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "choice",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "recommendation_feedback_run_id_profile_id_recommendation_attendees_run_id_profile_id_fk": {
+          "name": "recommendation_feedback_run_id_profile_id_recommendation_attendees_run_id_profile_id_fk",
+          "tableFrom": "recommendation_feedback",
+          "tableTo": "recommendation_attendees",
+          "columnsFrom": [
+            "run_id",
+            "profile_id"
+          ],
+          "columnsTo": [
+            "run_id",
+            "profile_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "recommendation_feedback_run_id_result_id_recommendation_results_run_id_id_fk": {
+          "name": "recommendation_feedback_run_id_result_id_recommendation_results_run_id_id_fk",
+          "tableFrom": "recommendation_feedback",
+          "tableTo": "recommendation_results",
+          "columnsFrom": [
+            "run_id",
+            "result_id"
+          ],
+          "columnsTo": [
+            "run_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "recommendation_feedback_run_id_profile_id_pk": {
+          "name": "recommendation_feedback_run_id_profile_id_pk",
+          "columns": [
+            "run_id",
+            "profile_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "recommendation_feedback_choice": {
+          "name": "recommendation_feedback_choice",
+          "value": "\"recommendation_feedback\".\"choice\" in ('selected', 'dismissed')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.recommendation_results": {
+      "name": "recommendation_results",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "run_id": {
+          "name": "run_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rank": {
+          "name": "rank",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "provider": {
+          "name": "provider",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "provider_place_id": {
+          "name": "provider_place_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "provider_policy_version": {
+          "name": "provider_policy_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "preference_score": {
+          "name": "preference_score",
+          "type": "numeric(9, 6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "metrics": {
+          "name": "metrics",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "explanations": {
+          "name": "explanations",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "recommendation_result_parent": {
+          "name": "recommendation_result_parent",
+          "columns": [
+            {
+              "expression": "run_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "recommendation_result_rank": {
+          "name": "recommendation_result_rank",
+          "columns": [
+            {
+              "expression": "run_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "rank",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "recommendation_result_restaurant": {
+          "name": "recommendation_result_restaurant",
+          "columns": [
+            {
+              "expression": "run_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "restaurant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "recommendation_result_provider": {
+          "name": "recommendation_result_provider",
+          "columns": [
+            {
+              "expression": "run_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "provider",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "provider_place_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "recommendation_results_run_id_recommendation_runs_id_fk": {
+          "name": "recommendation_results_run_id_recommendation_runs_id_fk",
+          "tableFrom": "recommendation_results",
+          "tableTo": "recommendation_runs",
+          "columnsFrom": [
+            "run_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "recommendation_results_restaurant_id_restaurants_id_fk": {
+          "name": "recommendation_results_restaurant_id_restaurants_id_fk",
+          "tableFrom": "recommendation_results",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "recommendation_rank": {
+          "name": "recommendation_rank",
+          "value": "\"recommendation_results\".\"rank\" between 1 and 20"
+        },
+        "recommendation_preference_score": {
+          "name": "recommendation_preference_score",
+          "value": "\"recommendation_results\".\"preference_score\" between 0 and 100"
+        },
+        "recommendation_result_identity": {
+          "name": "recommendation_result_identity",
+          "value": "(\"recommendation_results\".\"restaurant_id\" is not null and \"recommendation_results\".\"provider\" is null and \"recommendation_results\".\"provider_place_id\" is null and \"recommendation_results\".\"provider_policy_version\" is null) or (\"recommendation_results\".\"restaurant_id\" is null and \"recommendation_results\".\"provider\" is not null and \"recommendation_results\".\"provider_place_id\" is not null and \"recommendation_results\".\"provider_policy_version\" is not null and length(trim(\"recommendation_results\".\"provider\")) > 0 and length(trim(\"recommendation_results\".\"provider_place_id\")) > 0 and length(trim(\"recommendation_results\".\"provider_policy_version\")) > 0)"
+        },
+        "recommendation_result_metrics": {
+          "name": "recommendation_result_metrics",
+          "value": "jsonb_typeof(\"recommendation_results\".\"metrics\") = 'object' and jsonb_typeof(\"recommendation_results\".\"explanations\") = 'array'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.recommendation_runs": {
+      "name": "recommendation_runs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "request_id": {
+          "name": "request_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "request_hash": {
+          "name": "request_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mode": {
+          "name": "mode",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "algorithm_version": {
+          "name": "algorithm_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "filters": {
+          "name": "filters",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "search_query": {
+          "name": "search_query",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "result_limit": {
+          "name": "result_limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "counts": {
+          "name": "counts",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "recommendation_request_identity": {
+          "name": "recommendation_request_identity",
+          "columns": [
+            {
+              "expression": "request_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "recommendation_runs_history": {
+          "name": "recommendation_runs_history",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "recommendation_runs_created_by_profiles_id_fk": {
+          "name": "recommendation_runs_created_by_profiles_id_fk",
+          "tableFrom": "recommendation_runs",
+          "tableTo": "profiles",
+          "columnsFrom": [
+            "created_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "recommendation_mode": {
+          "name": "recommendation_mode",
+          "value": "\"recommendation_runs\".\"mode\" in ('favorites', 'new')"
+        },
+        "recommendation_status": {
+          "name": "recommendation_status",
+          "value": "\"recommendation_runs\".\"status\" in ('pending','completed','empty','unavailable','failed')"
+        },
+        "recommendation_limit": {
+          "name": "recommendation_limit",
+          "value": "\"recommendation_runs\".\"result_limit\" between 1 and 20"
+        },
+        "recommendation_request_hash": {
+          "name": "recommendation_request_hash",
+          "value": "\"recommendation_runs\".\"request_hash\" ~ '^[0-9a-f]{64}$'"
+        },
+        "recommendation_filters_object": {
+          "name": "recommendation_filters_object",
+          "value": "jsonb_typeof(\"recommendation_runs\".\"filters\") = 'object'"
+        },
+        "recommendation_completion": {
+          "name": "recommendation_completion",
+          "value": "(\"recommendation_runs\".\"status\" = 'pending') = (\"recommendation_runs\".\"completed_at\" is null)"
+        },
+        "recommendation_failure_reason": {
+          "name": "recommendation_failure_reason",
+          "value": "\"recommendation_runs\".\"status\" not in ('unavailable','failed') or (\"recommendation_runs\".\"reason\" is not null and length(trim(\"recommendation_runs\".\"reason\")) > 0)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.recommendation_visit_links": {
+      "name": "recommendation_visit_links",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "run_id": {
+          "name": "run_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "profile_id": {
+          "name": "profile_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "result_id": {
+          "name": "result_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "visit_id": {
+          "name": "visit_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "feedback_choice": {
+          "name": "feedback_choice",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'selected'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "recommendation_visit_origin": {
+          "name": "recommendation_visit_origin",
+          "columns": [
+            {
+              "expression": "visit_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "recommendation_visit_links_visit_id_visits_id_fk": {
+          "name": "recommendation_visit_links_visit_id_visits_id_fk",
+          "tableFrom": "recommendation_visit_links",
+          "tableTo": "visits",
+          "columnsFrom": [
+            "visit_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "recommendation_link_feedback_fk": {
+          "name": "recommendation_link_feedback_fk",
+          "tableFrom": "recommendation_visit_links",
+          "tableTo": "recommendation_feedback",
+          "columnsFrom": [
+            "run_id",
+            "profile_id",
+            "result_id",
+            "feedback_choice"
+          ],
+          "columnsTo": [
+            "run_id",
+            "profile_id",
+            "result_id",
+            "choice"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "recommendation_confirmed_selection": {
+          "name": "recommendation_confirmed_selection",
+          "value": "\"recommendation_visit_links\".\"feedback_choice\" = 'selected'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.restaurants": {
+      "name": "restaurants",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "address": {
+          "name": "address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'restaurant'"
+        },
+        "cuisines": {
+          "name": "cuisines",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
+        },
+        "price_tier": {
+          "name": "price_tier",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "normalized_name": {
+          "name": "normalized_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "normalized_address": {
+          "name": "normalized_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider": {
+          "name": "provider",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "provider_place_id": {
+          "name": "provider_place_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "restaurant_provider_identity": {
+          "name": "restaurant_provider_identity",
+          "columns": [
+            {
+              "expression": "provider",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "provider_place_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "restaurant_manual_duplicate_lookup": {
+          "name": "restaurant_manual_duplicate_lookup",
+          "columns": [
+            {
+              "expression": "normalized_name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "normalized_address",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "restaurant_cuisines": {
+          "name": "restaurant_cuisines",
+          "columns": [
+            {
+              "expression": "cuisines",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "restaurant_name_length": {
+          "name": "restaurant_name_length",
+          "value": "length(trim(\"restaurants\".\"name\")) between 1 and 160"
+        },
+        "restaurant_address_length": {
+          "name": "restaurant_address_length",
+          "value": "length(trim(\"restaurants\".\"address\")) between 1 and 300"
+        },
+        "restaurant_kind": {
+          "name": "restaurant_kind",
+          "value": "\"restaurants\".\"kind\" in ('restaurant', 'cafe')"
+        },
+        "restaurant_price_tier": {
+          "name": "restaurant_price_tier",
+          "value": "\"restaurants\".\"price_tier\" between 1 and 4"
+        },
+        "restaurant_provider_pair": {
+          "name": "restaurant_provider_pair",
+          "value": "(\"restaurants\".\"provider\" is null) = (\"restaurants\".\"provider_place_id\" is null)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.visits": {
+      "name": "visits",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "restaurant_id": {
+          "name": "restaurant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "profile_id": {
+          "name": "profile_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rating": {
+          "name": "rating",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "visit_date": {
+          "name": "visit_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "review_text": {
+          "name": "review_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "order_description": {
+          "name": "order_description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "amount_spent": {
+          "name": "amount_spent",
+          "type": "numeric(12, 2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'USD'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "visit_current_rating_lookup": {
+          "name": "visit_current_rating_lookup",
+          "columns": [
+            {
+              "expression": "restaurant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "profile_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "visit_date",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "visit_profile_history": {
+          "name": "visit_profile_history",
+          "columns": [
+            {
+              "expression": "profile_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "visit_date",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "visit_date_lookup": {
+          "name": "visit_date_lookup",
+          "columns": [
+            {
+              "expression": "visit_date",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "visits_restaurant_id_restaurants_id_fk": {
+          "name": "visits_restaurant_id_restaurants_id_fk",
+          "tableFrom": "visits",
+          "tableTo": "restaurants",
+          "columnsFrom": [
+            "restaurant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "visits_profile_id_profiles_id_fk": {
+          "name": "visits_profile_id_profiles_id_fk",
+          "tableFrom": "visits",
+          "tableTo": "profiles",
+          "columnsFrom": [
+            "profile_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "visit_rating_range": {
+          "name": "visit_rating_range",
+          "value": "\"visits\".\"rating\" >= 1 and \"visits\".\"rating\" <= 10"
+        },
+        "visit_review_length": {
+          "name": "visit_review_length",
+          "value": "char_length(\"visits\".\"review_text\") <= 2000"
+        },
+        "visit_order_length": {
+          "name": "visit_order_length",
+          "value": "char_length(\"visits\".\"order_description\") <= 300"
+        },
+        "visit_spending_nonnegative": {
+          "name": "visit_spending_nonnegative",
+          "value": "\"visits\".\"amount_spent\" >= 0 and \"visits\".\"amount_spent\" <= 9999999999.99"
+        },
+        "visit_currency": {
+          "name": "visit_currency",
+          "value": "\"visits\".\"currency\" = 'USD'"
+        },
+        "visit_not_future_utc": {
+          "name": "visit_not_future_utc",
+          "value": "\"visits\".\"visit_date\" <= (now() at time zone 'UTC')::date"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

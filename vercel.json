@@ -1,0 +1,31 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "web": {
+      "root": ".",
+      "framework": "nextjs",
+      "buildCommand": "npm run build",
+      "installCommand": "npm ci",
+      "bindings": [
+        {
+          "type": "service",
+          "service": "recommender",
+          "format": "url",
+          "env": "RECOMMENDER_URL"
+        }
+      ]
+    },
+    "recommender": {
+      "root": "api",
+      "framework": "flask",
+      "entrypoint": "index:app",
+      "functions": {
+        "index.py": {
+          "maxDuration": 30,
+          "excludeFiles": "{tests/**,.venv/**,__pycache__/**}"
+        }
+      }
+    }
+  },
+  "rewrites": [{ "source": "/(.*)", "destination": { "service": "web" } }]
+}

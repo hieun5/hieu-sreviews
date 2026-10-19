@@ -1,0 +1,2 @@
+ALTER TABLE "visits" DROP CONSTRAINT "visit_spending_nonnegative";--> statement-breakpoint
+ALTER TABLE "visits" ADD CONSTRAINT "visit_spending_nonnegative" CHECK ("visits"."amount_spent" >= 0 and "visits"."amount_spent" <= 9999999999.99);
