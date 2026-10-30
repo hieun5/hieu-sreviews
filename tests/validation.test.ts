@@ -94,7 +94,7 @@ describe("manual places", () => {
       normalizePlace("123 MAIN ST Seattle"),
     );
   });
-  it("requires name and address and separates listed price from spending", () => {
+  it("requires a name, allows an omitted address, and separates listed price from spending", () => {
     const place = {
       name: "Cafe",
       address: "123 Main",
@@ -109,9 +109,10 @@ describe("manual places", () => {
     expect(restaurantSchema.safeParse({ ...place, name: " " }).success).toBe(
       false,
     );
-    expect(restaurantSchema.safeParse({ ...place, address: "" }).success).toBe(
-      false,
-    );
+    expect(restaurantSchema.parse({ ...place, address: "" }).address).toBe("");
+    expect(
+      restaurantSchema.parse({ ...place, address: undefined }).address,
+    ).toBe("");
     expect(
       restaurantSchema.safeParse({ ...place, priceTier: "5" }).success,
     ).toBe(false);

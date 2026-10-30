@@ -1,6 +1,5 @@
 import Link from "next/link";
 import {
-  ArrowUpRight,
   CircleCheck,
   Coffee,
   Database,
@@ -12,6 +11,7 @@ import { formatRating } from "@/lib/ratings";
 import type Decimal from "decimal.js";
 import { FoodDoodle } from "./food-doodle";
 import { ratingMood } from "./rating-mood";
+import { DeletePlaceButton } from "./delete-place-button";
 
 export function Brand() {
   return (
@@ -34,14 +34,14 @@ export function PageHeader({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="mb-7 flex flex-wrap items-center justify-between gap-4">
-      <div>
+    <div className="page-header mb-7 flex flex-wrap items-center justify-between gap-4">
+      <div className="page-header-copy">
         <h1 className="display mb-0 text-[clamp(26px,3vw,34px)]">{title}</h1>
         {description ? (
           <p className="muted mb-0 mt-2 max-w-2xl text-sm">{description}</p>
         ) : null}
       </div>
-      {action}
+      {action ? <div className="page-header-actions">{action}</div> : null}
     </div>
   );
 }
@@ -150,60 +150,73 @@ export function PlaceCard({
   average,
   reviewerCount,
   visitCount,
+  showRemove = false,
 }: {
   place: Restaurant;
   average: Decimal | null;
   reviewerCount: number;
   visitCount: number;
+  showRemove?: boolean;
 }) {
   const Icon = place.kind === "cafe" ? Coffee : UtensilsCrossed;
+  const mood = ratingMood(average?.toString() ?? null);
   return (
-    <Link
-      href={`/places/${place.id}`}
-      className="panel place-card block text-ink"
+    <article
+      className="panel place-card group relative text-ink"
       data-kind={place.kind}
+      data-rating-tone={mood.tone}
     >
-      <div className="mb-5 flex items-center justify-between">
-        <span className="place-icon">
-          <Icon size={22} strokeWidth={1.4} aria-hidden="true" />
-        </span>
-        <ArrowUpRight size={18} className="text-muted" aria-hidden="true" />
-      </div>
-      <div className="mb-2 flex flex-wrap gap-1.5">
-        <span className="text-[11px] text-muted">
-          {place.kind === "cafe" ? "Café" : "Restaurant"}
-        </span>
-      </div>
-      <h2 className="mb-2 text-[19px] font-semibold tracking-tight">
-        {place.name}
-      </h2>
-      <p className="muted mb-4 truncate text-xs">{place.address}</p>
-      <div className="mb-5 flex min-h-6 flex-wrap gap-1.5">
-        {place.cuisines.slice(0, 3).map((cuisine) => (
-          <span key={cuisine} className="badge">
-            {cuisine}
+      {showRemove ? (
+        <DeletePlaceButton
+          id={place.id}
+          name={place.name}
+          visitCount={visitCount}
+        />
+      ) : null}
+      <Link href={`/places/${place.id}`} className="block text-ink">
+        <div className="mb-3 flex items-center">
+          <span className="place-icon">
+            <Icon size={22} strokeWidth={1.4} aria-hidden="true" />
           </span>
-        ))}
-        {place.priceTier ? (
-          <span
-            className="badge"
-            aria-label={`Price tier ${place.priceTier} of 4`}
-          >
-            {"$".repeat(place.priceTier)}
-          </span>
-        ) : null}
-      </div>
-      <div className="flex items-end justify-between border-t border-line pt-4">
-        <div>
-          <p className="muted mb-0 text-[11px]">Group score</p>
-          <Rating value={average} />
         </div>
-        <p className="muted mb-1 text-right text-[10px]">
-          {reviewerCount} {reviewerCount === 1 ? "reviewer" : "reviewers"}
-          <br />
-          {visitCount} {visitCount === 1 ? "visit" : "visits"}
-        </p>
-      </div>
-    </Link>
+        <div className="mb-2 flex flex-wrap gap-1.5">
+          <span className="text-[11px] text-muted">
+            {place.kind === "cafe" ? "Café" : "Restaurant"}
+          </span>
+        </div>
+        <h2 className="mb-2 text-[19px] font-semibold tracking-tight">
+          {place.name}
+        </h2>
+        {place.address ? (
+          <p className="muted mb-4 truncate text-xs">{place.address}</p>
+        ) : null}
+        <div className="mb-5 flex min-h-6 flex-wrap gap-1.5">
+          {place.cuisines.slice(0, 3).map((cuisine) => (
+            <span key={cuisine} className="badge">
+              {cuisine}
+            </span>
+          ))}
+          {place.priceTier ? (
+            <span
+              className="badge"
+              aria-label={`Price tier ${place.priceTier} of 4`}
+            >
+              {"$".repeat(place.priceTier)}
+            </span>
+          ) : null}
+        </div>
+        <div className="flex items-end justify-between border-t border-line pt-4">
+          <div>
+            <p className="muted mb-0 text-[11px]">Group score</p>
+            <Rating value={average} />
+          </div>
+          <p className="muted mb-1 text-right text-[10px]">
+            {reviewerCount} {reviewerCount === 1 ? "reviewer" : "reviewers"}
+            <br />
+            {visitCount} {visitCount === 1 ? "visit" : "visits"}
+          </p>
+        </div>
+      </Link>
+    </article>
   );
 }

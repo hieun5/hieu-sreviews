@@ -60,9 +60,6 @@ export default async function ProfilesPage() {
             </form>
           ))}
         </div>
-        <p className="muted mt-6 max-w-lg text-xs">
-          Profiles are shared selections, not secured accounts. Anyone with access to this journal can choose a profile.
-        </p>
       </section>
     </main>
   );

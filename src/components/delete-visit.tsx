@@ -43,7 +43,7 @@ export function DeleteVisit({ id, date }: { id: string; date: string }) {
         type="button"
         disabled={pending}
         onClick={remove}
-        className="inline-flex min-h-9 items-center gap-1.5 rounded px-2 text-xs text-[#963d2d] hover:bg-[#f8e9df] disabled:opacity-60"
+        className="inline-flex min-h-11 items-center gap-1.5 rounded px-3 text-sm text-[#963d2d] hover:bg-[#f8e9df] disabled:opacity-60"
       >
         <Trash2 size={13} aria-hidden="true" />
         {pending ? "Deleting..." : "Delete"}

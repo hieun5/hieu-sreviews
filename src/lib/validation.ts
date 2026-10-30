@@ -52,7 +52,7 @@ export function makeVisitSchema(today = todayInTimeZone()) {
 
 export const restaurantSchema = z.object({
   name: z.string().trim().min(1, "Enter the place name.").max(160),
-  address: z.string().trim().min(1, "Enter an address.").max(300),
+  address: z.string().trim().max(300).default(""),
   kind: z.enum(["restaurant", "cafe"]),
   cuisines: z
     .string()

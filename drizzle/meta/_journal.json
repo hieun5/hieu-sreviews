@@ -36,6 +36,13 @@
       "when": 1792378399878,
       "tag": "0004_bumpy_thanos",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792383437783,
+      "tag": "0005_lively_squadron_sinister",
+      "breakpoints": true
     }
   ]
 }

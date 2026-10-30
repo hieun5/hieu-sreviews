@@ -130,7 +130,6 @@ Verification: `npm test` passed 198 tests across 11 suites; `npm run lint`, `npm
 
 Python test execution initially hit Windows sandbox access denial for its isolated interpreter's base Python. The same `npm run test:python` command was rerun with approved unsandboxed execution and passed all 19 tests. The rebuilt production server also passed the profile selection/switch smoke; it is stopped. Browser verification remains unavailable.
 
-
 ## October 18, 2026 Neon and Vercel deployment
 
 Neon production was initialized for project `quiet-band-41101117` / organization `org-fancy-sea-24821602`, production branch, PostgreSQL 18 in AWS us-west-2. The `neon.ts` policy already matched the branch; `neon deploy` reported no changes. `npm run db:migrate` and `npm run db:seed` completed against Neon production. The seed preserved existing restaurants and visits.
@@ -140,3 +139,27 @@ Created and deployed Vercel project `hieu-sreviews` with Services framework, Nex
 Verification: authenticated Vercel CLI requests returned the application and dashboard API data backed by Neon. Local production E2E exercised profile selection/switching, restaurant creation/search/duplicate response, repeat visits, rating edits and deletion fallback, filtered analytics, and honest AI-summary unavailability; all temporary data was cleaned. `npm test` passed 198 tests, lint and typecheck passed, Python tests passed (19), production build passed, and `npm audit --omit=dev` reported zero runtime vulnerabilities. The Vercel remote build reported 9 development dependency audit findings (4 moderate, 5 high). Browser automation was unavailable. Live recommendation service-to-service scoring and AI/provider integrations remain unverified against external credentials.
 
 Vercel Authentication is enabled on the production deployment. This prevents general public access; profile selection is not authentication. Do not disable protection without an explicit access-policy decision because the shared journal permits reads and writes. Deployment instructions and required environment variables are documented in `docs/vercel-deployment.md`.
+
+## October 18, 2026 addressless place creation and price-tier controls
+
+The manual place form now accepts a missing/blank address and offers selectable buttons for Unknown and price tiers `$` through `$$$$`. API/form validation normalizes omitted addresses to an empty string. PostgreSQL keeps its existing non-null address column but its check constraint now permits the empty string; migration `0005_lively_squadron_sinister.sql` applies the change. Addressless records skip normalized duplicate checks, since matching names alone do not establish identity. The directory/detail surfaces show “Address not added.” Updated backend API and README guidance.
+
+Changed UI form/display files, shared journal contract, app validation/server action/repository, database schema and migration, tests, and documentation. No package or lockfile changes. The migration was applied to Neon production after diagnosing local addressless-place submissions; it relaxes the address constraint without changing existing rows. The currently deployed app remains compatible, but the updated UI/API code has not been deployed.
+
+Verification: `npm.cmd test` passed 199 tests across 11 suites; lint, typecheck, and production build passed. A read-only Neon query confirmed connectivity and five profiles; restaurant and visit tables were empty. After migration, the local app created a temporary addressless place through its API and the row was removed. No Vercel deployment was run.
+
+## October 18, 2026 combined add-place and first-visit flow
+
+The manual add page now collects a place and the selected profile's first visit together, without an address input. New endpoint `POST /api/places/with-visit` validates both payloads and saves them atomically (Neon HTTP batch; transaction fallback for PostgreSQL test clients). It returns the visit and links to the saved place. Updated `docs/backend-api.md`, README, and UI/backend progress notes.
+
+Changed UI form/page, journal API/repository/contracts, route wiring, tests, and documentation. No dependencies or migrations were needed beyond the already-applied address constraint migration. The combined endpoint uses the selected profile cookie, with the existing unauthenticated-profile limitation unchanged.
+
+Verification: `npm test` passed 201 tests; lint, typecheck, and `npm run build` passed. PGlite tests verify successful combined creation and rollback on visit insert failure. A local production build made one live Neon combined create with blank address, rating, price tier, review, order, and spending; the stored values were verified and all temporary rows were removed. Vercel was not redeployed and no commit was made.
+
+## October 18, 2026 confirmed place removal
+
+Added `DELETE /api/restaurants/{id}` with selected-profile and same-origin checks. The repository removes recommendation results first, then all visits and the restaurant in one database batch/transaction; dependent review summaries, feedback, and confirmed recommendation links are removed by their foreign-key cascades. The response includes `visitsDeleted`. Missing places return the shared 404 envelope. The confirmation and Places-only control are described in `docs/ui-progress.md`.
+
+Verification: targeted route/API tests passed (75 tests), full `npm test` passed (202 tests), lint and typecheck passed, and the production build passed. No live Neon delete request or Vercel deployment was performed; browser interaction is unavailable.
+
+Follow-up diagnosis: a fresh local production server connected to Neon successfully created and deleted a temporary addressless place with one visit; the API returned HTTP 200 and `visitsDeleted: 1`, and the temporary row was removed. The existing localhost development server briefly returned an empty HTTP 500 while the production build was running, then returned the expected JSON 404 for a nonexistent ID. The user's report is now reflected by displaying actionable client-side errors rather than masking parsing/network failures with a generic message. Do not infer a live-data failure from that transient build overlap.

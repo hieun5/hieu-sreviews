@@ -2,6 +2,7 @@ import {
   externalSearchQuerySchema,
   externalSearchResponseSchema,
   idSchema,
+  placeWithVisitCreateSchema,
   profileIdSchema,
   restaurantCreateSchema,
   restaurantListQuerySchema,
@@ -91,6 +92,22 @@ export function createJournalApi(deps: Dependencies) {
           Location: `/api/restaurants/${created.id}`,
         });
       }),
+    createPlaceWithVisit: (request: Request) =>
+      handle(async () => {
+        assertSameOrigin(request);
+        const selected = await profile();
+        const input = parseInput(
+          placeWithVisitCreateSchema(deps.today()),
+          await parseJson(request),
+        );
+        const created = await deps
+          .repository()
+          .createRestaurantWithVisit(input.place, input.visit, selected);
+        await changed();
+        return json({ data: serializeVisit(created.visit) }, 201, {
+          Location: `/api/visits/${created.visit.id}`,
+        });
+      }),
     getRestaurant: (request: Request, id: string) =>
       handle(async () => {
         await profile();
@@ -109,6 +126,15 @@ export function createJournalApi(deps: Dependencies) {
             await repository.history([validId]),
           ),
         });
+      }),
+    deleteRestaurant: (request: Request, id: string) =>
+      handle(async () => {
+        assertSameOrigin(request);
+        await profile();
+        const validId = parseInput(idSchema, id, "INVALID_ID");
+        const deleted = await deps.repository().deleteRestaurant(validId);
+        await changed();
+        return json({ data: { ...deleted, deleted: true } });
       }),
     listVisits: (request: Request) =>
       handle(async () => {

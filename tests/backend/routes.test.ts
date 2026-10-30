@@ -20,6 +20,7 @@ import * as restaurant from "../../src/app/api/restaurants/[id]/route";
 import * as visits from "../../src/app/api/visits/route";
 import * as visit from "../../src/app/api/visits/[id]/route";
 import * as search from "../../src/app/api/places/search/route";
+import * as placeWithVisit from "../../src/app/api/places/with-visit/route";
 import * as dashboard from "../../src/app/api/dashboard/route";
 import * as analytics from "../../src/app/api/analytics/route";
 import * as recommendationRuns from "../../src/app/api/recommendations/runs/route";
@@ -74,6 +75,13 @@ const mutations = () => [
       }),
     ),
   () =>
+    placeWithVisit.POST(
+      request("/api/places/with-visit", "POST", {
+        place: { name: "Moon" },
+        visit: { rating: 8, visitDate: "2020-01-01" },
+      }),
+    ),
+  () =>
     visits.POST(
       request("/api/visits", "POST", {
         restaurantId: id,
@@ -87,6 +95,8 @@ const mutations = () => [
       context(),
     ),
   () => visit.DELETE(request(`/api/visits/${id}`, "DELETE"), context()),
+  () =>
+    restaurant.DELETE(request(`/api/restaurants/${id}`, "DELETE"), context()),
 ];
 async function error(response: Response, status: number, code: string) {
   expect(response.status).toBe(status);
@@ -112,6 +122,12 @@ describe("actual Next.js route exports and runtime composition", () => {
         visits.GET(request("/api/visits")),
         visit.GET(request(`/api/visits/${id}`), context()),
         search.GET(request("/api/places/search?q=coffee")),
+        placeWithVisit.POST(
+          request("/api/places/with-visit", "POST", {
+            place: { name: "Moon" },
+            visit: { rating: 8, visitDate: "2020-01-01" },
+          }),
+        ),
         dashboard.GET(request("/api/dashboard")),
         analytics.GET(request("/api/analytics")),
         recommendationRuns.GET(request("/api/recommendations/runs")),
@@ -213,6 +229,14 @@ describe("actual Next.js route exports and runtime composition", () => {
       400,
       "INVALID_ID",
     );
+    await error(
+      await restaurant.DELETE(
+        request("/api/restaurants/bad-id", "DELETE"),
+        invalid,
+      ),
+      400,
+      "INVALID_ID",
+    );
     expect(getDb).not.toHaveBeenCalled();
   });
 
@@ -226,7 +250,7 @@ describe("actual Next.js route exports and runtime composition", () => {
       {
         reject: restaurant.POST,
         options: restaurant.OPTIONS,
-        allow: "GET, HEAD, OPTIONS",
+        allow: "GET, HEAD, DELETE, OPTIONS",
       },
       {
         reject: visits.PUT,
@@ -242,6 +266,11 @@ describe("actual Next.js route exports and runtime composition", () => {
         reject: search.POST,
         options: search.OPTIONS,
         allow: "GET, HEAD, OPTIONS",
+      },
+      {
+        reject: placeWithVisit.GET,
+        options: placeWithVisit.OPTIONS,
+        allow: "POST, OPTIONS",
       },
       {
         reject: dashboard.POST,

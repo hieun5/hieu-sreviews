@@ -1,0 +1,2 @@
+ALTER TABLE "restaurants" DROP CONSTRAINT "restaurant_address_length";--> statement-breakpoint
+ALTER TABLE "restaurants" ADD CONSTRAINT "restaurant_address_length" CHECK (length(trim("restaurants"."address")) <= 300);

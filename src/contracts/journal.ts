@@ -44,9 +44,11 @@ export const restaurantCreateSchema = z
     address: z
       .string()
       .trim()
-      .min(1)
       .max(300)
-      .regex(/[\p{L}\p{N}]/u, "Use letters or numbers."),
+      .refine((value) => value === "" || /[\p{L}\p{N}]/u.test(value), {
+        message: "Use letters or numbers.",
+      })
+      .default(""),
     kind: z.enum(["restaurant", "cafe"]).default("restaurant"),
     cuisines: z
       .array(z.string().trim().min(1).max(60))
@@ -103,6 +105,13 @@ export function visitCreateSchema(today: string) {
     reviewText: fields.reviewText.default(null),
     orderDescription: fields.orderDescription.default(null),
     amountSpentCents: fields.amountSpentCents.default(null),
+  });
+}
+
+export function placeWithVisitCreateSchema(today: string) {
+  return z.strictObject({
+    place: restaurantCreateSchema,
+    visit: visitCreateSchema(today).omit({ restaurantId: true }),
   });
 }
 
@@ -196,6 +205,13 @@ export const visitDeleteResponseSchema = z.object({
     id: idSchema,
     restaurantId: idSchema,
     deleted: z.literal(true),
+  }),
+});
+export const restaurantDeleteResponseSchema = z.object({
+  data: z.object({
+    id: idSchema,
+    deleted: z.literal(true),
+    visitsDeleted: z.number().int().nonnegative(),
   }),
 });
 

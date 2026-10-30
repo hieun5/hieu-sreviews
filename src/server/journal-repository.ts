@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import {
   and,
   asc,
@@ -19,12 +20,16 @@ import type {
   VisitListQuery,
   VisitUpdate,
 } from "@/contracts/journal";
+import type {
+  Restaurant as RestaurantRow,
+  Visit as VisitRow,
+} from "@/db/schema";
 import * as schema from "@/db/schema";
 import { normalizePlace } from "@/lib/validation";
 import { ApiError } from "./api-errors";
 import { centsToDollars } from "./journal-serialization";
 
-const { restaurants, visits, profiles } = schema;
+const { restaurants, visits, profiles, recommendationResults } = schema;
 const visitOrder = [
   desc(visits.visitDate),
   desc(visits.createdAt),
@@ -91,6 +96,27 @@ export function createJournalRepository<Q extends PgQueryResultHKT>(
   }
 
   async function createRestaurant(input: RestaurantCreate) {
+    const { values, normalizedName, normalizedAddress } =
+      await prepareRestaurant(input);
+    // The unique index resolves provider-ID races atomically. Manual duplicate
+    // checks are advisory because an explicit confirmation permits duplicates.
+    const [created] = await db
+      .insert(restaurants)
+      .values({ ...values, normalizedName, normalizedAddress })
+      .onConflictDoNothing({
+        target: [restaurants.provider, restaurants.providerPlaceId],
+      })
+      .returning();
+    if (!created)
+      throw new ApiError(
+        409,
+        "PROVIDER_ID_CONFLICT",
+        "This provider place was saved by another request. Search the saved places.",
+      );
+    return created;
+  }
+
+  async function prepareRestaurant(input: RestaurantCreate) {
     if (input.provider !== null && input.providerPlaceId !== null) {
       const existing = await db
         .select()
@@ -118,21 +144,23 @@ export function createJournalRepository<Q extends PgQueryResultHKT>(
     }
     const normalizedName = normalizePlace(input.name);
     const normalizedAddress = normalizePlace(input.address);
-    const duplicates = await db
-      .select({
-        id: restaurants.id,
-        name: restaurants.name,
-        address: restaurants.address,
-      })
-      .from(restaurants)
-      .where(
-        and(
-          eq(restaurants.normalizedName, normalizedName),
-          eq(restaurants.normalizedAddress, normalizedAddress),
-        ),
-      )
-      .orderBy(asc(restaurants.id))
-      .limit(20);
+    const duplicates = normalizedAddress
+      ? await db
+          .select({
+            id: restaurants.id,
+            name: restaurants.name,
+            address: restaurants.address,
+          })
+          .from(restaurants)
+          .where(
+            and(
+              eq(restaurants.normalizedName, normalizedName),
+              eq(restaurants.normalizedAddress, normalizedAddress),
+            ),
+          )
+          .orderBy(asc(restaurants.id))
+          .limit(20)
+      : [];
     if (duplicates.length && !input.confirmDuplicate)
       throw new ApiError(
         409,
@@ -141,40 +169,104 @@ export function createJournalRepository<Q extends PgQueryResultHKT>(
         {},
         { duplicates },
       );
-    const {
-      name,
-      address,
-      kind,
-      cuisines,
-      priceTier,
-      provider,
-      providerPlaceId,
-    } = input;
     const values = {
-      name,
-      address,
-      kind,
-      cuisines,
-      priceTier,
-      provider,
-      providerPlaceId,
+      name: input.name,
+      address: input.address,
+      kind: input.kind,
+      cuisines: input.cuisines,
+      priceTier: input.priceTier,
+      provider: input.provider,
+      providerPlaceId: input.providerPlaceId,
     };
-    // The unique index resolves provider-ID races atomically. Manual duplicate
-    // checks are advisory because an explicit confirmation permits duplicates.
-    const [created] = await db
-      .insert(restaurants)
-      .values({ ...values, normalizedName, normalizedAddress })
-      .onConflictDoNothing({
-        target: [restaurants.provider, restaurants.providerPlaceId],
-      })
-      .returning();
-    if (!created)
+    return { values, normalizedName, normalizedAddress };
+  }
+
+  async function createRestaurantWithVisit(
+    input: RestaurantCreate,
+    firstVisit: Omit<VisitCreate, "restaurantId">,
+    profileId: string,
+  ) {
+    const [profile] = await db
+      .select({ id: profiles.id })
+      .from(profiles)
+      .where(eq(profiles.id, profileId));
+    if (!profile)
       throw new ApiError(
         409,
-        "PROVIDER_ID_CONFLICT",
-        "This provider place was saved by another request. Search the saved places.",
+        "PROFILE_UNAVAILABLE",
+        "The selected profile has not been seeded in the journal database.",
       );
-    return created;
+
+    const { values, normalizedName, normalizedAddress } =
+      await prepareRestaurant(input);
+    const restaurantId = randomUUID();
+    const { amountSpentCents, rating, ...visitValues } = firstVisit;
+    const restaurantInsert = db
+      .insert(restaurants)
+      .values({
+        id: restaurantId,
+        ...values,
+        normalizedName,
+        normalizedAddress,
+      })
+      .returning();
+    const visitInsert = db
+      .insert(visits)
+      .values({
+        ...visitValues,
+        restaurantId,
+        profileId,
+        rating: String(rating),
+        amountSpent: centsToDollars(amountSpentCents),
+      })
+      .returning();
+
+    try {
+      const batchDatabase = db as unknown as {
+        batch?: (queries: unknown[]) => Promise<unknown[]>;
+      };
+      if (batchDatabase.batch) {
+        const [restaurantRows, visitRows] = (await batchDatabase.batch.call(
+          db,
+          [restaurantInsert, visitInsert],
+        )) as [RestaurantRow[], VisitRow[]];
+        return { restaurant: restaurantRows[0], visit: visitRows[0] };
+      }
+      return await db.transaction(async (tx) => {
+        const [restaurant] = await tx
+          .insert(restaurants)
+          .values({
+            id: restaurantId,
+            ...values,
+            normalizedName,
+            normalizedAddress,
+          })
+          .returning();
+        const [visit] = await tx
+          .insert(visits)
+          .values({
+            ...visitValues,
+            restaurantId,
+            profileId,
+            rating: String(rating),
+            amountSpent: centsToDollars(amountSpentCents),
+          })
+          .returning();
+        return { restaurant, visit };
+      });
+    } catch (error) {
+      if (
+        input.provider !== null &&
+        input.providerPlaceId !== null &&
+        (error as { code?: string })?.code === "23505"
+      )
+        throw new ApiError(
+          409,
+          "PROVIDER_ID_CONFLICT",
+          "This provider place was saved by another request. Search the saved places.",
+        );
+      throw error;
+    }
   }
 
   async function listVisits(query: VisitListQuery) {
@@ -279,16 +371,70 @@ export function createJournalRepository<Q extends PgQueryResultHKT>(
     return deleted;
   }
 
+  async function deleteRestaurant(id: string) {
+    const resultDelete = db
+      .delete(recommendationResults)
+      .where(eq(recommendationResults.restaurantId, id));
+    const visitDelete = db
+      .delete(visits)
+      .where(eq(visits.restaurantId, id))
+      .returning({ id: visits.id });
+    const restaurantDelete = db
+      .delete(restaurants)
+      .where(eq(restaurants.id, id))
+      .returning({ id: restaurants.id });
+
+    let visitRows: { id: string }[];
+    let restaurantRows: { id: string }[];
+    const batchDatabase = db as unknown as {
+      batch?: (queries: unknown[]) => Promise<unknown[]>;
+    };
+    if (batchDatabase.batch) {
+      const results = await batchDatabase.batch.call(db, [
+        resultDelete,
+        visitDelete,
+        restaurantDelete,
+      ]);
+      visitRows = results[1] as { id: string }[];
+      restaurantRows = results[2] as { id: string }[];
+    } else {
+      const results = await db.transaction(async (tx) => {
+        await tx
+          .delete(recommendationResults)
+          .where(eq(recommendationResults.restaurantId, id));
+        const deletedVisits = await tx
+          .delete(visits)
+          .where(eq(visits.restaurantId, id))
+          .returning({ id: visits.id });
+        const deletedRestaurants = await tx
+          .delete(restaurants)
+          .where(eq(restaurants.id, id))
+          .returning({ id: restaurants.id });
+        return [deletedVisits, deletedRestaurants] as const;
+      });
+      [visitRows, restaurantRows] = results;
+    }
+    if (!restaurantRows.length)
+      throw new ApiError(
+        404,
+        "NOT_FOUND",
+        "The saved place could not be found.",
+      );
+    return { id, visitsDeleted: visitRows.length };
+  }
+
   return {
     restaurant,
     visit,
     history,
     listRestaurants,
     createRestaurant,
+    createRestaurantWithVisit,
     listVisits,
     createVisit,
     updateVisit,
     deleteVisit,
+    deleteRestaurant,
   };
 }
 

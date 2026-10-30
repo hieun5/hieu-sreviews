@@ -64,24 +64,26 @@ export async function createRestaurant(
     const db = getDb();
     const normalizedName = normalizePlace(parsed.data.name);
     const normalizedAddress = normalizePlace(parsed.data.address);
-    if (!normalizedName || !normalizedAddress)
+    if (!normalizedName)
       return {
         values,
-        error: "Use a name and address containing letters or numbers.",
+        error: "Use a place name containing letters or numbers.",
       };
-    const duplicates = await db
-      .select({
-        id: restaurants.id,
-        name: restaurants.name,
-        address: restaurants.address,
-      })
-      .from(restaurants)
-      .where(
-        and(
-          eq(restaurants.normalizedName, normalizedName),
-          eq(restaurants.normalizedAddress, normalizedAddress),
-        ),
-      );
+    const duplicates = normalizedAddress
+      ? await db
+          .select({
+            id: restaurants.id,
+            name: restaurants.name,
+            address: restaurants.address,
+          })
+          .from(restaurants)
+          .where(
+            and(
+              eq(restaurants.normalizedName, normalizedName),
+              eq(restaurants.normalizedAddress, normalizedAddress),
+            ),
+          )
+      : [];
     if (duplicates.length && data.get("duplicateConfirmed") !== "on") {
       return {
         values,

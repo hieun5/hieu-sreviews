@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Coffee, MapPin, Plus, UtensilsCrossed } from "lucide-react";
+import { ArrowLeft, Coffee, MapPin, UtensilsCrossed } from "lucide-react";
 import { z } from "zod";
 import { Avatar } from "@/components/avatar";
 import {
@@ -41,14 +41,14 @@ export default async function RestaurantPage({
     <>
       <Link
         href="/places"
-        className="mb-6 inline-flex items-center gap-2 text-xs text-accent"
+        className="mb-4 inline-flex min-h-11 items-center gap-2 text-sm text-accent"
       >
         <ArrowLeft size={14} aria-hidden="true" />
         All places
       </Link>
       <StatusNotice saved={query.saved} error={query.error} />
       <div className="mb-8 flex flex-wrap items-start justify-between gap-6">
-        <div>
+        <div className="min-w-0 max-w-full">
           <div className="mb-4 flex items-center gap-3">
             <span className="place-icon">
               <Icon size={24} strokeWidth={1.3} aria-hidden="true" />
@@ -57,13 +57,15 @@ export default async function RestaurantPage({
               {place.kind === "cafe" ? "Café" : "Restaurant"}
             </span>
           </div>
-          <h1 className="display mb-3 text-[clamp(28px,3vw,36px)]">
+          <h1 className="display mb-3 break-words text-[clamp(28px,3vw,36px)]">
             {place.name}
           </h1>
-          <p className="muted mb-4 flex items-center gap-2 text-sm">
-            <MapPin size={15} aria-hidden="true" />
-            {place.address}
-          </p>
+          {place.address ? (
+            <p className="muted mb-4 flex items-center gap-2 text-sm">
+              <MapPin size={15} aria-hidden="true" />
+              {place.address}
+            </p>
+          ) : null}
           <div className="flex flex-wrap gap-2">
             {place.cuisines.map((cuisine) => (
               <span key={cuisine} className="badge">
@@ -77,9 +79,8 @@ export default async function RestaurantPage({
             ) : null}
           </div>
         </div>
-        <Link href={`/places/${id}/visits/new`} className="btn">
-          <Plus size={16} aria-hidden="true" />
-          Log a visit
+        <Link href={`/places/${id}/visits/new`} className="btn btn-secondary">
+          Log another visit
         </Link>
       </div>
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
@@ -141,7 +142,7 @@ export default async function RestaurantPage({
                     {configured ? (
                       <Avatar profile={configured} size={34} />
                     ) : null}
-                    <div className="flex-1">
+                    <div className="min-w-0 flex-1">
                       <p className="mb-0 text-sm font-semibold">
                         {friend.name}
                       </p>

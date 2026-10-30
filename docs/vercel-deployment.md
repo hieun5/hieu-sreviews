@@ -4,10 +4,19 @@ The application is deployed to Vercel as project `hieu-sreviews` with two servic
 
 The production deployment is currently protected by Vercel Authentication. Anyone outside the Vercel team needs authorized access before the app will load. Profile selection is not authentication; changing the deployment to public would allow anyone with the URL to read and change the shared journal. Choose the access policy before inviting friends.
 
-Production setup completed October 18, 2026:
+## October 30, 2026 mobile release
+
+Production is now deployment `dpl_2udp59C7y7C56FUT7DFXBUALHiKC`, built from the local working tree and promoted after staged checks. The existing URL https://hieu-sreviews.vercel.app resolves to it. The release includes the unified dashboard, combined place/visit flow, optional-address support, place removal, phone layout, and a search-focus correction found during phone testing. Vercel Authentication remains enabled.
+
+Chrome responsive checks covered 320, 375, 390, and 430px portrait widths and 844 × 390px landscape. Hosted profile/page checks, temporary-record persistence/cleanup checks, all 202 tests, lint, typecheck, and the remote build passed. Production HTTP and browser analytics-filter checks passed after promotion. Runtime error/fatal logs returned zero records in the inspected window. Physical-device/software-keyboard testing remains unperformed. See [the mobile release verification](mobile-release-verification.md) for exact coverage, source provenance, and limits.
+
+`.vercelignore` excludes local credentials, agent settings, caches, virtual environments, and verification output. No environment variables, database schema, or access settings were changed for this release step.
+
+## Initial production setup — October 18, 2026
 
 - Neon project `quiet-band-41101117`, organization `org-fancy-sea-24821602`, production branch, PostgreSQL 18 in AWS us-west-2. The branch was already compliant with `neon.ts`; `neon deploy` reported no changes and pulled its connection variables locally.
 - Applied database migrations and seeded the two starter profiles against Neon production. Seeding preserved existing visits and restaurants.
+- Later applied migration `0005_lively_squadron_sinister.sql` to permit blank restaurant addresses; it changes only the address check constraint and preserves existing rows. Its corresponding application update was subsequently deployed in the October 30 release above.
 - Vercel production environment has server-only `DATABASE_URL`, `APP_TIME_ZONE`, and a generated `RECOMMENDER_SHARED_SECRET`; the private service binding supplies `RECOMMENDER_URL`. AI summary credentials and restaurant-provider credentials are not configured, so those features return their documented unavailable states.
 - Production deployment `6y27RiqrX71sGk8YCQ83eVGoLtGi` is Ready at https://hieu-sreviews.vercel.app. Authenticated Vercel CLI requests verified the app response and `/api/dashboard` data from Neon. A local end-to-end flow also verified profile switching, restaurant search/create/duplicate detection, repeat visits, edit/delete rating fallback, analytics filters, and graceful summary unavailability. Temporary test data was removed.
 - `npm test` (198 tests), lint, typecheck, Python tests (19), production build, and `npm audit --omit=dev` all passed. Browser automation was unavailable. Remote build logs reported 9 development dependency audit findings (4 moderate, 5 high); runtime dependencies have no reported vulnerabilities.

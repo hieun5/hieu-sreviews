@@ -62,7 +62,7 @@ export const restaurants = pgTable(
     ),
     check(
       "restaurant_address_length",
-      sql`length(trim(${table.address})) between 1 and 300`,
+      sql`length(trim(${table.address})) <= 300`,
     ),
     check("restaurant_kind", sql`${table.kind} in ('restaurant', 'cafe')`),
     check("restaurant_price_tier", sql`${table.priceTier} between 1 and 4`),

@@ -1,0 +1,17 @@
+.agents/
+.codex/
+.git/
+.next/
+.npm-cache/
+.vercel/
+.neon
+node_modules/
+api/.venv/
+**/__pycache__/
+coverage/
+test-results/
+playwright-report/
+.env*
+!.env.example
+*.log
+*.tsbuildinfo

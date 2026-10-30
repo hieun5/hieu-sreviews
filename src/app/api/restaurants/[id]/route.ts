@@ -9,8 +9,13 @@ export async function GET(
 ) {
   return journalApi.getRestaurant(request, (await context.params).id);
 }
-export const POST = methodNotAllowed("GET, HEAD, OPTIONS");
+export async function DELETE(
+  request: Request,
+  context: { params: Promise<{ id: string }> },
+) {
+  return journalApi.deleteRestaurant(request, (await context.params).id);
+}
+export const POST = methodNotAllowed("GET, HEAD, DELETE, OPTIONS");
 export const PUT = POST;
 export const PATCH = POST;
-export const DELETE = POST;
-export const OPTIONS = options("GET, HEAD, OPTIONS");
+export const OPTIONS = options("GET, HEAD, DELETE, OPTIONS");

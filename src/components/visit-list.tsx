@@ -38,7 +38,7 @@ export function VisitList({
           <article
             id={`visit-${visit.id}`}
             key={visit.id}
-            className="px-6 py-5"
+            className="visit-entry px-4 py-5 sm:px-6"
           >
             <div className="flex items-start gap-3">
               {profile ? <Avatar profile={profile} size={36} /> : null}
@@ -86,7 +86,7 @@ export function VisitList({
                   <div className="mt-2 flex items-center gap-2">
                     <Link
                       href={`/visits/${visit.id}/edit`}
-                      className="inline-flex min-h-9 items-center gap-1.5 rounded px-2 text-xs text-accent hover:bg-[#f4e9db]"
+                      className="inline-flex min-h-11 items-center gap-1.5 rounded px-3 text-sm text-accent hover:bg-[#f4e9db]"
                     >
                       <Pencil size={13} aria-hidden="true" />
                       Edit

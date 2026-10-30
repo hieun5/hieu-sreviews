@@ -186,7 +186,7 @@ export function RecommendationPanel({
             {profiles.map((profile) => (
               <label
                 key={profile.id}
-                className="inline-flex items-center gap-2 rounded-full border border-line px-3 py-2 text-xs"
+                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-line px-3 py-2 text-sm"
               >
                 <input
                   type="checkbox"

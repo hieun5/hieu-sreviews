@@ -17,6 +17,7 @@ import {
   externalSearchResponseSchema,
   MAX_SPENDING_CENTS,
   restaurantListResponseSchema,
+  restaurantDeleteResponseSchema,
   restaurantResponseSchema,
   visitDeleteResponseSchema,
   visitListResponseSchema,
@@ -131,6 +132,42 @@ beforeEach(async () => {
 });
 
 describe("restaurant API against the committed PostgreSQL migrations", () => {
+  it("removes a saved place and all visit history, then recalculates the directory", async () => {
+    const saved = await addPlace();
+    await addVisit(saved.id, {
+      reviewText: "Good noodles",
+      amountSpentCents: 2200,
+    });
+    const response = await api.deleteRestaurant(
+      request(`/api/restaurants/${saved.id}`, "DELETE"),
+      saved.id,
+    );
+    const deleted = await read(restaurantDeleteResponseSchema, response);
+    expect(deleted.data).toEqual({
+      id: saved.id,
+      visitsDeleted: 1,
+      deleted: true,
+    });
+    expect(await repository.restaurant(saved.id)).toBeUndefined();
+    expect(await db.select().from(schema.visits)).toEqual([]);
+    expect(
+      (
+        await read(
+          restaurantListResponseSchema,
+          await api.listRestaurants(request("/api/restaurants")),
+        )
+      ).pagination.total,
+    ).toBe(0);
+    await failure(
+      await api.deleteRestaurant(
+        request(`/api/restaurants/${saved.id}`, "DELETE"),
+        saved.id,
+      ),
+      404,
+      "NOT_FOUND",
+    );
+  });
+
   it("creates a manual place with honest empty scores, retrieves it, and hides normalization columns", async () => {
     const created = await addPlace();
     expect(created).toMatchObject({
@@ -157,6 +194,74 @@ describe("restaurant API against the committed PostgreSQL migrations", () => {
       created,
     );
     expect(onMutation).toHaveBeenCalledTimes(1);
+  });
+
+  it("allows places without an address and does not treat blank addresses as duplicate evidence", async () => {
+    const first = await addPlace({ name: "Addressless Cafe", address: "" });
+    const second = await addPlace({ name: "Addressless Cafe", address: "" });
+    expect(first.address).toBe("");
+    expect(second.address).toBe("");
+    expect(second.id).not.toBe(first.id);
+  });
+
+  it("creates the place and its first visit together", async () => {
+    const response = await api.createPlaceWithVisit(
+      request("/api/places/with-visit", "POST", {
+        place: {
+          name: "First Visit Cafe",
+          kind: "cafe",
+          cuisines: ["Coffee"],
+          priceTier: 2,
+        },
+        visit: {
+          rating: 8.5,
+          visitDate: "2026-10-17",
+          reviewText: "A good first visit.",
+          orderDescription: "Latte",
+          amountSpentCents: 1450,
+        },
+      }),
+    );
+    const created = (await read(visitResponseSchema, response, 201)).data;
+    const restaurant = await repository.restaurant(created.restaurantId);
+    expect(restaurant).toMatchObject({
+      name: "First Visit Cafe",
+      address: "",
+      priceTier: 2,
+    });
+    expect(created).toMatchObject({
+      profileId: "hieu",
+      rating: 8.5,
+      reviewText: "A good first visit.",
+      amountSpentCents: 1450,
+    });
+  });
+
+  it("rolls back the new place if its first visit cannot be inserted", async () => {
+    const before = await db.select().from(schema.restaurants);
+    await expect(
+      repository.createRestaurantWithVisit(
+        {
+          name: "Must Roll Back Cafe",
+          address: "",
+          kind: "cafe",
+          cuisines: [],
+          priceTier: null,
+          provider: null,
+          providerPlaceId: null,
+          confirmDuplicate: false,
+        },
+        {
+          rating: 8,
+          visitDate: "9999-12-31",
+          reviewText: null,
+          orderDescription: null,
+          amountSpentCents: null,
+        },
+        "hieu",
+      ),
+    ).rejects.toThrow();
+    expect(await db.select().from(schema.restaurants)).toEqual(before);
   });
 
   it("warns for accent/punctuation/case/whitespace normalized duplicates and requires explicit confirmation", async () => {

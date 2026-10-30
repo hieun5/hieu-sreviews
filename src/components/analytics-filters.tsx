@@ -18,19 +18,30 @@ export function AnalyticsFiltersForm({
   places,
   cuisines,
   today,
+  action = "/analytics",
+  search = "",
 }: {
   values: AnalyticsFilterValues;
   profiles: { id: string; name: string }[];
   places: { id: string; name: string }[];
   cuisines: string[];
   today: string;
+  action?: string;
+  search?: string;
 }) {
   const [view, setView] = useState(values.view);
   return (
     <form
-      action="/analytics"
-      className="panel mb-6 grid gap-4 p-5 sm:grid-cols-2 xl:grid-cols-4"
+      action={action === "/" ? "/#dashboard-analytics" : action}
+      className={
+        action === "/"
+          ? "grid gap-3"
+          : "panel mb-6 grid gap-4 p-5 sm:grid-cols-2 xl:grid-cols-4"
+      }
     >
+      {action === "/" && search ? (
+        <input type="hidden" name="q" value={search} />
+      ) : null}
       <div>
         <label htmlFor="view" className="field-label">
           View
@@ -124,9 +135,16 @@ export function AnalyticsFiltersForm({
           defaultValue={values.end}
         />
       </div>
-      <div className="flex items-end gap-3 sm:col-span-2">
+      <div
+        className={`form-actions flex flex-wrap items-end gap-3${action === "/" ? "" : " sm:col-span-2"}`}
+      >
         <button className="btn">Apply filters</button>
-        <Link href="/analytics" className="btn btn-quiet">
+        <Link
+          href={
+            action === "/" ? `/?view=${view}#dashboard-analytics` : "/analytics"
+          }
+          className="btn btn-quiet"
+        >
           Reset
         </Link>
       </div>

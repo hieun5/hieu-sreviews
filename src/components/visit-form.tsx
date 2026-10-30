@@ -88,7 +88,7 @@ export function VisitForm({
     }
   }
   return (
-    <form onSubmit={submit} className="panel space-y-6 p-6 sm:p-8">
+    <form onSubmit={submit} className="panel journal-form space-y-6 p-4 sm:p-8">
       <input name="restaurantId" type="hidden" value={restaurantId} />
       {state.error ? (
         <p role="alert" className="notice notice-error">
@@ -219,7 +219,7 @@ export function VisitForm({
             ? "This corrects the existing visit. To record a return visit, use Log a visit instead."
             : "Every return visit gets its own entry. Your latest visit date determines your current score."}
         </p>
-        <div className="flex flex-wrap gap-3">
+        <div className="form-actions flex flex-wrap gap-3">
           <button className="btn" disabled={pending}>
             {pending ? "Saving visit…" : visit ? "Save changes" : "Save visit"}
           </button>

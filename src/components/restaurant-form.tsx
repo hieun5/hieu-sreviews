@@ -4,63 +4,97 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { ArrowRight } from "lucide-react";
-import { restaurantResponseSchema } from "@/contracts/journal";
+import { visitResponseSchema } from "@/contracts/journal";
 import { ApiRequestError, requestJson } from "@/lib/client/api";
+import { usdToCents } from "@/lib/client/money";
 import type { FormState } from "@/lib/action-state";
+import { RatingPicker } from "./rating-picker";
 
-export function RestaurantForm() {
+export function RestaurantForm({
+  profileName,
+  today,
+}: {
+  profileName: string;
+  today: string;
+}) {
   const router = useRouter();
   const [state, setState] = useState<FormState>({});
   const [pending, setPending] = useState(false);
+  const [priceTier, setPriceTier] = useState<number | null>(null);
   const error = (key: string) => state.fields?.[key]?.[0];
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPending(true);
     setState({});
     const form = new FormData(event.currentTarget);
+    let amountSpentCents: number | null;
+    try {
+      amountSpentCents = usdToCents(String(form.get("amountSpent") ?? ""));
+    } catch (caught) {
+      const message =
+        caught instanceof Error ? caught.message : "Enter a valid USD amount.";
+      setState({
+        error: message,
+        fields: { "visit.amountSpentCents": [message] },
+      });
+      setPending(false);
+      return;
+    }
+
     try {
       const response = await requestJson(
-        "/api/restaurants",
+        "/api/places/with-visit",
         {
           method: "POST",
           body: JSON.stringify({
-            name: String(form.get("name") ?? ""),
-            address: String(form.get("address") ?? ""),
-            kind: String(form.get("kind") ?? "restaurant"),
-            cuisines: String(form.get("cuisines") ?? "")
-              .split(",")
-              .map((item) => item.trim())
-              .filter(Boolean),
-            priceTier: form.get("priceTier")
-              ? Number(form.get("priceTier"))
-              : null,
-            confirmDuplicate: form.has("duplicateConfirmed"),
+            place: {
+              name: String(form.get("name") ?? ""),
+              address: "",
+              kind: String(form.get("kind") ?? "restaurant"),
+              cuisines: String(form.get("cuisines") ?? "")
+                .split(",")
+                .map((item) => item.trim())
+                .filter(Boolean),
+              priceTier,
+              confirmDuplicate: form.has("duplicateConfirmed"),
+            },
+            visit: {
+              rating: Number(form.get("rating")),
+              visitDate: String(form.get("visitDate") ?? ""),
+              reviewText: String(form.get("reviewText") ?? ""),
+              orderDescription: String(form.get("orderDescription") ?? ""),
+              amountSpentCents,
+            },
           }),
         },
-        (value) => restaurantResponseSchema.parse(value),
+        (value) => visitResponseSchema.parse(value),
       );
-      router.push(`/places/${response.data.id}?saved=place`);
+      router.push(`/places/${response.data.restaurantId}?saved=visit`);
       router.refresh();
     } catch (caught) {
       if (caught instanceof ApiRequestError) {
-        const duplicates = caught.body.details?.duplicates;
+        const fields = { ...caught.body.fieldErrors };
+        if (fields["visit.amountSpentCents"])
+          fields.amountSpent = fields["visit.amountSpentCents"];
         setState({
           error: caught.message,
-          fields: caught.body.fieldErrors,
-          duplicates,
+          fields,
+          duplicates: caught.body.details?.duplicates,
         });
       } else {
         setState({
           error:
-            "Couldn’t save this place. Check your connection and try again.",
+            "Couldn’t save this place and visit. Check your connection and try again.",
         });
       }
     } finally {
       setPending(false);
     }
   }
+
   return (
-    <form onSubmit={submit} className="panel space-y-6 p-6 sm:p-8">
+    <form onSubmit={submit} className="panel journal-form space-y-6 p-4 sm:p-8">
       {state.error ? (
         <div role="alert" className="notice notice-error">
           {state.error}
@@ -77,7 +111,9 @@ export function RestaurantForm() {
             >
               <span>
                 {place.name}
-                <span className="muted block text-xs">{place.address}</span>
+                {place.address ? (
+                  <span className="muted block text-xs">{place.address}</span>
+                ) : null}
               </span>
               <ArrowRight size={16} aria-hidden="true" />
             </Link>
@@ -92,114 +128,195 @@ export function RestaurantForm() {
           </label>
         </div>
       ) : null}
-      <div className="grid gap-6 sm:grid-cols-[1fr_180px]">
+
+      <section className="space-y-6">
+        <h2 className="section-title">The place</h2>
+        <div className="grid gap-6 sm:grid-cols-[1fr_180px]">
+          <div>
+            <label htmlFor="name" className="field-label">
+              Place name <span className="text-accent">*</span>
+            </label>
+            <input
+              id="name"
+              name="name"
+              className="input"
+              placeholder="Restaurant or café name"
+              required
+              maxLength={160}
+              defaultValue={state.values?.name}
+              aria-invalid={!!error("place.name")}
+            />
+            {error("place.name") ? (
+              <p className="field-error">{error("place.name")}</p>
+            ) : null}
+          </div>
+          <div>
+            <label htmlFor="kind" className="field-label">
+              Type <span className="text-accent">*</span>
+            </label>
+            <select
+              id="kind"
+              name="kind"
+              className="input"
+              defaultValue={state.values?.kind || "restaurant"}
+            >
+              <option value="restaurant">Restaurant</option>
+              <option value="cafe">Café</option>
+            </select>
+          </div>
+        </div>
         <div>
-          <label htmlFor="name" className="field-label">
-            Place name <span className="text-accent">*</span>
+          <label htmlFor="cuisines" className="field-label">
+            Cuisines & categories{" "}
+            <span className="font-normal text-muted">· optional</span>
           </label>
           <input
-            id="name"
-            name="name"
+            id="cuisines"
+            name="cuisines"
             className="input"
-            placeholder="Restaurant or café name"
-            required
-            maxLength={160}
-            defaultValue={state.values?.name}
-            aria-invalid={!!error("name")}
-            aria-describedby={error("name") ? "name-error" : undefined}
+            placeholder="e.g. Vietnamese, coffee, brunch"
+            maxLength={500}
+            defaultValue={state.values?.cuisines}
+            aria-invalid={!!error("place.cuisines")}
+            aria-describedby="cuisines-help"
           />
-          {error("name") ? (
-            <p id="name-error" className="field-error">
-              {error("name")}
-            </p>
+          <p id="cuisines-help" className="muted mb-0 mt-2 text-xs">
+            Separate categories with commas. Up to eight categories.
+          </p>
+          {error("place.cuisines") ? (
+            <p className="field-error">{error("place.cuisines")}</p>
           ) : null}
         </div>
         <div>
-          <label htmlFor="kind" className="field-label">
-            Type <span className="text-accent">*</span>
-          </label>
-          <select
-            id="kind"
-            name="kind"
-            className="input"
-            defaultValue={state.values?.kind || "restaurant"}
+          <p className="field-label">
+            Listed price tier{" "}
+            <span className="font-normal text-muted">· optional</span>
+          </p>
+          <div
+            className="flex flex-wrap gap-2"
+            role="group"
+            aria-label="Listed price tier"
           >
-            <option value="restaurant">Restaurant</option>
-            <option value="cafe">Café</option>
-          </select>
+            {[null, 1, 2, 3, 4].map((tier) => {
+              const selected = priceTier === tier;
+              return (
+                <button
+                  key={tier ?? "unknown"}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => setPriceTier(tier)}
+                  className={`btn ${selected ? "" : "btn-secondary"}`}
+                >
+                  {tier === null ? "Unknown" : "$".repeat(tier)}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
-      <div>
-        <label htmlFor="address" className="field-label">
-          Address <span className="text-accent">*</span>
-        </label>
-        <input
-          id="address"
-          name="address"
-          className="input"
-          placeholder="Street address, city, and region"
-          required
-          maxLength={300}
-          defaultValue={state.values?.address}
-          aria-invalid={!!error("address")}
-          aria-describedby={error("address") ? "address-error" : undefined}
-        />
-        {error("address") ? (
-          <p id="address-error" className="field-error">
-            {error("address")}
+      </section>
+
+      <section className="space-y-6 border-t border-line pt-6">
+        <div>
+          <h2 className="section-title mb-2">Your visit</h2>
+          <p className="muted mb-0 text-sm">
+            Reviewing as{" "}
+            <strong className="font-semibold text-ink">{profileName}</strong>.
           </p>
-        ) : null}
-      </div>
-      <div>
-        <label htmlFor="cuisines" className="field-label">
-          Cuisines & categories{" "}
-          <span className="font-normal text-muted">· optional</span>
-        </label>
-        <input
-          id="cuisines"
-          name="cuisines"
-          className="input"
-          placeholder="e.g. Vietnamese, coffee, brunch"
-          maxLength={500}
-          defaultValue={state.values?.cuisines}
-          aria-invalid={!!error("cuisines")}
-          aria-describedby="cuisines-help cuisines-error"
+        </div>
+        <RatingPicker
+          initialValue={state.values?.rating ?? ""}
+          error={error("visit.rating")}
         />
-        <p id="cuisines-help" className="muted mb-0 mt-2 text-xs">
-          Separate categories with commas. Up to eight categories.
-        </p>
-        {error("cuisines") ? (
-          <p id="cuisines-error" className="field-error">
-            {error("cuisines")}
-          </p>
-        ) : null}
-      </div>
-      <div>
-        <label htmlFor="priceTier" className="field-label">
-          Listed price tier{" "}
-          <span className="font-normal text-muted">· optional</span>
-        </label>
-        <select
-          id="priceTier"
-          name="priceTier"
-          className="input max-w-xs"
-          defaultValue={state.values?.priceTier || ""}
-          aria-describedby="price-help"
-        >
-          <option value="">Unknown / not recorded</option>
-          <option value="1">$</option>
-          <option value="2">$$</option>
-          <option value="3">$$$</option>
-          <option value="4">$$$$</option>
-        </select>
-        <p id="price-help" className="muted mb-0 mt-2 text-xs">
-          Only enter a tier you know. Actual spending is recorded separately on
-          each visit.
-        </p>
-      </div>
-      <div className="flex flex-wrap gap-3 border-t border-line pt-6">
+        <div className="max-w-xs">
+          <label htmlFor="visitDate" className="field-label">
+            Visit date <span className="text-accent">*</span>
+          </label>
+          <input
+            id="visitDate"
+            name="visitDate"
+            className="input"
+            type="date"
+            required
+            max={today}
+            defaultValue={state.values?.visitDate ?? today}
+            aria-invalid={!!error("visit.visitDate")}
+          />
+          {error("visit.visitDate") ? (
+            <p className="field-error">{error("visit.visitDate")}</p>
+          ) : null}
+        </div>
+        <div>
+          <label htmlFor="orderDescription" className="field-label">
+            What did you order?{" "}
+            <span className="font-normal text-muted">· optional</span>
+          </label>
+          <textarea
+            id="orderDescription"
+            name="orderDescription"
+            className="input"
+            rows={2}
+            maxLength={300}
+            placeholder="What you had"
+            defaultValue={state.values?.orderDescription}
+            aria-invalid={!!error("visit.orderDescription")}
+          />
+          {error("visit.orderDescription") ? (
+            <p className="field-error">{error("visit.orderDescription")}</p>
+          ) : null}
+        </div>
+        <div>
+          <label htmlFor="reviewText" className="field-label">
+            Review <span className="font-normal text-muted">· optional</span>
+          </label>
+          <textarea
+            id="reviewText"
+            name="reviewText"
+            className="input"
+            rows={4}
+            maxLength={2000}
+            placeholder="What did you think?"
+            defaultValue={state.values?.reviewText}
+            aria-invalid={!!error("visit.reviewText")}
+          />
+          {error("visit.reviewText") ? (
+            <p className="field-error">{error("visit.reviewText")}</p>
+          ) : null}
+        </div>
+        <div className="max-w-xs">
+          <label htmlFor="amountSpent" className="field-label">
+            Spent per person{" "}
+            <span className="font-normal text-muted">· optional</span>
+          </label>
+          <div className="relative">
+            <span className="absolute left-4 top-2.5 text-sm text-muted">
+              $
+            </span>
+            <input
+              id="amountSpent"
+              name="amountSpent"
+              className="input pl-8 pr-14"
+              type="number"
+              inputMode="decimal"
+              min="0"
+              max="9999999999.99"
+              step="0.01"
+              placeholder="Not recorded"
+              defaultValue={state.values?.amountSpent}
+              aria-invalid={!!error("visit.amountSpentCents")}
+            />
+            <span className="absolute right-4 top-3 text-xs text-muted">
+              USD
+            </span>
+          </div>
+          {error("visit.amountSpentCents") ? (
+            <p className="field-error">{error("visit.amountSpentCents")}</p>
+          ) : null}
+        </div>
+      </section>
+
+      <div className="form-actions flex flex-wrap gap-3 border-t border-line pt-6">
         <button className="btn" disabled={pending}>
-          {pending ? "Saving place…" : "Save place"}
+          {pending ? "Saving place and visit…" : "Save place and visit"}
         </button>
         <Link href="/places" className="btn btn-secondary">
           Cancel
