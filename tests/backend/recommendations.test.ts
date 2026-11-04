@@ -48,7 +48,7 @@ const metrics = {
 };
 const score = vi.fn(
   async (input: ScoringInput): Promise<ScoredRecommendations> => ({
-    algorithmVersion: "recommendations-v1",
+    algorithmVersion: "recommendations-v2",
     scoreKind: "preference-index",
     results: input.candidates.length
       ? [
@@ -369,7 +369,7 @@ describe("recommendation PostgreSQL persistence and API orchestration", () => {
 
   it("stores empty rankings honestly", async () => {
     score.mockImplementationOnce(async (sent) => ({
-      algorithmVersion: "recommendations-v1",
+      algorithmVersion: "recommendations-v2",
       scoreKind: "preference-index",
       results: [],
       counts: {
@@ -596,7 +596,7 @@ describe("recommendation PostgreSQL persistence and API orchestration", () => {
       }),
     ).rejects.toThrow();
     const scored: ScoredRecommendations = {
-      algorithmVersion: "recommendations-v1",
+      algorithmVersion: "recommendations-v2",
       scoreKind: "preference-index",
       results: [],
       counts: {
@@ -658,7 +658,7 @@ describe("private scoring client contract", () => {
     const fetcher = vi.fn().mockResolvedValue(
       Response.json({
         data: {
-          algorithmVersion: "recommendations-v1",
+          algorithmVersion: "recommendations-v2",
           scoreKind: "preference-index",
           results: [],
           counts: {
@@ -694,7 +694,7 @@ describe("private scoring client contract", () => {
       Response.json({ data: {} }),
       Response.json({
         data: {
-          algorithmVersion: "recommendations-v1",
+          algorithmVersion: "recommendations-v2",
           scoreKind: "preference-index",
           results: [{ candidateKey: "invented" }],
           counts: {},

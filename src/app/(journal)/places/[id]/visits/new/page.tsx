@@ -8,7 +8,7 @@ import { getJournal } from "@/lib/data";
 import { DEFAULT_TIME_ZONE, todayInTimeZone } from "@/lib/dates";
 import { requireProfile } from "@/lib/profile";
 
-export const metadata = { title: "Log a visit" };
+export const metadata = { title: "Add your review" };
 
 export default async function NewVisitPage({
   params,
@@ -35,8 +35,13 @@ export default async function NewVisitPage({
         <ArrowLeft size={14} aria-hidden="true" />
         {place.name}
       </Link>
-      <PageHeader title="Log a visit" />
-      <VisitForm restaurantId={id} profileName={profile.name} today={today} />
+      <PageHeader title={`Your review of ${place.name}`} />
+      <VisitForm
+        restaurantId={id}
+        profileName={profile.name}
+        profileId={profile.id}
+        today={today}
+      />
     </div>
   );
 }

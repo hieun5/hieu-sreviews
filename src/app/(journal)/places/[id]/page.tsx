@@ -10,7 +10,6 @@ import {
   StatusNotice,
 } from "@/components/ui";
 import { VisitList } from "@/components/visit-list";
-import { ReviewSummaryPanel } from "@/components/review-summary-panel";
 import { findProfile } from "@/config/profiles";
 import { getJournal } from "@/lib/data";
 import { formatDate } from "@/lib/dates";
@@ -79,11 +78,13 @@ export default async function RestaurantPage({
             ) : null}
           </div>
         </div>
-        <Link href={`/places/${id}/visits/new`} className="btn btn-secondary">
-          Log another visit
+        <Link href={`/places/${id}/visits/new`} className="btn">
+          {history.some((visit) => visit.profileId === profile.id)
+            ? "Review another visit"
+            : "Add your review"}
         </Link>
       </div>
-      <div className="mb-8 grid gap-4 sm:grid-cols-3">
+      <div className="mb-8 grid gap-4 sm:grid-cols-2">
         <div className="panel p-6">
           <p className="muted mb-3 text-xs">Current group average</p>
           <Rating value={summary.average} />
@@ -94,7 +95,7 @@ export default async function RestaurantPage({
           </p>
         </div>
         <div className="panel p-6">
-          <p className="muted mb-3 text-xs">Your current score</p>
+          <p className="muted mb-3 text-xs">Your rating</p>
           <Rating
             value={
               summary.scores.find((visit) => visit.profileId === profile.id)
@@ -103,19 +104,11 @@ export default async function RestaurantPage({
           />
           <p className="muted mb-0 mt-2 text-xs">
             {history.filter((visit) => visit.profileId === profile.id).length}{" "}
-            visits from {profile.name}
-          </p>
-        </div>
-        <div className="panel p-6">
-          <p className="muted mb-3 text-xs">Group agreement</p>
-          <p className="stat-value mb-0">
-            {formatRating(summary.agreement)}
-            <span className="ml-2 font-sans text-xs text-muted">σ</span>
-          </p>
-          <p className="muted mb-0 mt-2 text-xs">
-            {summary.reviewerCount >= 2
-              ? "Population deviation · lower = more agreement"
-              : "Needs at least two reviewers"}
+            {history.filter((visit) => visit.profileId === profile.id)
+              .length === 1
+              ? "visit"
+              : "visits"}{" "}
+            from {profile.name}
           </p>
         </div>
       </div>
@@ -146,7 +139,7 @@ export default async function RestaurantPage({
                       <p className="mb-0 text-sm font-semibold">
                         {friend.name}
                       </p>
-                      <p className="muted mb-0 text-[11px]">
+                      <p className="muted mb-0 text-xs">
                         {score
                           ? formatDate(score.visitDate)
                           : "Hasn’t reviewed this place"}
@@ -160,43 +153,32 @@ export default async function RestaurantPage({
           ) : (
             <EmptyState
               title="No ratings yet"
-              description="Log a visit to add yours."
-              href={`/places/${id}/visits/new`}
-              action="Log a visit"
+              description="Add your review using the button above."
             />
           )}
         </section>
         <details className="mt-3 text-xs text-muted">
           <summary className="cursor-pointer">How scores work</summary>
           <p className="mb-0 mt-2 max-w-xl leading-relaxed">
-            Each return visit is a new entry. Only your latest visit determines
-            your current score. Visit date comes first, then creation time, then
-            the visit’s unique ID to break a tie.
+            Every meal gets its own entry. Each friend’s latest visit determines
+            their current score and the group average.
+          </p>
+          <p className="mb-0 mt-2">
+            Group agreement: {formatRating(summary.agreement)}. A smaller spread
+            means our scores are closer together.
           </p>
         </details>
       </div>
-      <ReviewSummaryPanel
-        restaurantId={id}
-        reviews={history
-          .filter((visit) => visit.reviewText?.trim())
-          .map(({ id: visitId, profileId, visitDate }) => ({
-            id: visitId,
-            profileId,
-            visitDate,
-          }))}
-        profileNames={Object.fromEntries(
-          journal.profiles.map(({ id: profileId, name }) => [profileId, name]),
-        )}
-      />
       <div className="mb-5 mt-9 flex flex-wrap items-end justify-between gap-3">
         <h2 className="section-title">Visits</h2>
-        <span className="muted text-[11px]">
+        <span className="muted text-xs">
           Every visit, including earlier scores
         </span>
       </div>
       <section className="panel">
         {history.length ? (
           <VisitList
+            allVisits={journal.visits}
             visits={history}
             profiles={journal.profiles}
             restaurants={journal.restaurants}

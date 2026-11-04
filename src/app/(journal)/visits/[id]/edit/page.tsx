@@ -44,6 +44,7 @@ export default async function EditVisitPage({
       <VisitForm
         restaurantId={place.id}
         profileName={profile.name}
+        profileId={profile.id}
         today={today}
         visit={visit}
       />

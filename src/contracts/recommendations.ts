@@ -6,7 +6,7 @@ import {
   paginationSchema,
 } from "./journal";
 
-export const RECOMMENDATION_VERSION = "recommendations-v1";
+export const RECOMMENDATION_VERSION = "recommendations-v2";
 const decimal = z.string().regex(/^\d+(?:\.\d+)?$/);
 export const recommendationFiltersSchema = z.strictObject({
   cuisine: z.string().trim().min(1).max(60).nullable().default(null),
@@ -67,6 +67,7 @@ export const recommendationMetricsSchema = z.object({
 export const explanationSchema = z.object({
   code: z.enum([
     "observed-ratings",
+    "group-fallback",
     "limited-agreement",
     "cuisine-preferences",
     "neutral-prior",
@@ -166,7 +167,7 @@ export const recommendationRunSchema = z.object({
   status: z.enum(["pending", "completed", "empty", "unavailable", "failed"]),
   reason: z.string().nullable(),
   createdBy: z.string(),
-  algorithmVersion: z.literal(RECOMMENDATION_VERSION),
+  algorithmVersion: z.enum(["recommendations-v1", RECOMMENDATION_VERSION]),
   scoreKind: z.literal("preference-index"),
   scoreRange: z.object({ min: z.literal(0), max: z.literal(100) }),
   attendees: z.array(z.string()),

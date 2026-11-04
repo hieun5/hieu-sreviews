@@ -2,7 +2,7 @@ import Link from "next/link";
 import {
   CircleCheck,
   Coffee,
-  Database,
+  BookOpen,
   Plus,
   UtensilsCrossed,
 } from "lucide-react";
@@ -36,7 +36,7 @@ export function PageHeader({
   return (
     <div className="page-header mb-7 flex flex-wrap items-center justify-between gap-4">
       <div className="page-header-copy">
-        <h1 className="display mb-0 text-[clamp(26px,3vw,34px)]">{title}</h1>
+        <h1 className="display mb-0">{title}</h1>
         {description ? (
           <p className="muted mb-0 mt-2 max-w-2xl text-sm">{description}</p>
         ) : null}
@@ -59,7 +59,7 @@ export function EmptyState({
 }) {
   return (
     <div className="px-6 py-9 text-center">
-      <FoodDoodle size={68} className="mx-auto mb-2" />
+      <FoodDoodle size={44} className="mx-auto mb-2" />
       <h2 className="section-title mb-2">{title}</h2>
       <p className="muted mx-auto mb-5 max-w-md text-sm">{description}</p>
       {href && action ? (
@@ -75,12 +75,11 @@ export function EmptyState({
 export function DatabaseSetup() {
   return (
     <div className="panel p-6">
-      <Database size={23} className="mb-4 text-accent" aria-hidden="true" />
-      <h2 className="section-title mb-2">
-        Connect the database to get started.
-      </h2>
+      <BookOpen size={23} className="mb-4 text-accent" aria-hidden="true" />
+      <h2 className="section-title mb-2">The journal isn’t ready just yet.</h2>
       <p className="muted mb-0 max-w-xl text-sm">
-        Follow the Neon setup in the README to save places and visits.
+        Our places and reviews will appear here once the journal is connected.
+        Please try again in a little while.
       </p>
     </div>
   );
@@ -95,7 +94,7 @@ export function StatusNotice({
 }) {
   const messages: Record<string, string> = {
     place: "Place saved.",
-    visit: "Visit saved.",
+    visit: "Review saved. Thanks for the hot take!",
     edit: "Visit updated.",
     delete: "Visit deleted. Ratings updated.",
   };
@@ -130,11 +129,6 @@ export function Rating({
       className={compact ? "font-semibold text-accent tabular-nums" : "score"}
       data-mood={mood.tone}
     >
-      {!compact && value !== null ? (
-        <span className="score-reaction" aria-hidden="true">
-          {mood.emoji}
-        </span>
-      ) : null}
       {formatRating(value)}
       {value !== null ? (
         <span className="ml-1 font-sans text-[11px] font-normal text-muted">
@@ -207,7 +201,7 @@ export function PlaceCard({
         </div>
         <div className="flex items-end justify-between border-t border-line pt-4">
           <div>
-            <p className="muted mb-0 text-[11px]">Group score</p>
+            <p className="muted mb-0 text-[11px]">The group’s take</p>
             <Rating value={average} />
           </div>
           <p className="muted mb-1 text-right text-[10px]">

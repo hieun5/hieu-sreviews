@@ -1,0 +1,330 @@
+{
+  "regions": [
+    {
+      "id": "brand-icon",
+      "kind": "chrome",
+      "box": {
+        "x": 0.05078125,
+        "y": 0.010416666666666666,
+        "w": 0.0986328125,
+        "h": 0.048177083333333336
+      },
+      "note": "Small dumpling brand icon glyph.",
+      "snap": false,
+      "grid": "A0:B0"
+    },
+    {
+      "id": "brand-name",
+      "kind": "text",
+      "box": {
+        "x": 0.162109375,
+        "y": 0.016276041666666668,
+        "w": 0.2978515625,
+        "h": 0.03125
+      },
+      "note": "hieu’s reviews wordmark.",
+      "snap": false,
+      "grid": "B0:E0"
+    },
+    {
+      "id": "header-links",
+      "kind": "control",
+      "box": {
+        "x": 0.7265625,
+        "y": 0.016276041666666668,
+        "w": 0.228515625,
+        "h": 0.03125
+      },
+      "note": "Our places link and secondary menu button.",
+      "snap": false,
+      "grid": "H0:J0"
+    },
+    {
+      "id": "lead",
+      "kind": "text",
+      "box": {
+        "x": 0.05078125,
+        "y": 0.07486979166666667,
+        "w": 0.693359375,
+        "h": 0.044270833333333336
+      },
+      "note": "What did you eat?",
+      "snap": false,
+      "grid": "A0:H1"
+    },
+    {
+      "id": "intro",
+      "kind": "text",
+      "box": {
+        "x": 0.0537109375,
+        "y": 0.12890625,
+        "w": 0.5615234375,
+        "h": 0.020833333333333332
+      },
+      "note": "Good meals. Honest opinions. Just us.",
+      "snap": false,
+      "grid": "A1:G1"
+    },
+    {
+      "id": "reviewer-label",
+      "kind": "text",
+      "box": {
+        "x": 0.05078125,
+        "y": 0.173828125,
+        "w": 0.3564453125,
+        "h": 0.021484375
+      },
+      "note": "Who’s reviewing?",
+      "snap": false,
+      "grid": "A1:E1"
+    },
+    {
+      "id": "reviewer-choices",
+      "kind": "control",
+      "box": {
+        "x": 0.07421875,
+        "y": 0.20572916666666666,
+        "w": 0.857421875,
+        "h": 0.09830729166666667
+      },
+      "note": "Five selectable reviewer initials and names, Hieu selected.",
+      "snap": false,
+      "grid": "A2:J3"
+    },
+    {
+      "id": "ticket-top",
+      "kind": "chrome",
+      "box": {
+        "x": 0.037109375,
+        "y": 0.3216145833333333,
+        "w": 0.9287109375,
+        "h": 0.011067708333333334
+      },
+      "note": "Rounded upper edge of the white ticket.",
+      "snap": false,
+      "grid": "A3:J3"
+    },
+    {
+      "id": "place-label",
+      "kind": "text",
+      "box": {
+        "x": 0.068359375,
+        "y": 0.3372395833333333,
+        "w": 0.2138671875,
+        "h": 0.020833333333333332
+      },
+      "note": "The place.",
+      "snap": false,
+      "grid": "A3:C3"
+    },
+    {
+      "id": "place-search",
+      "kind": "control",
+      "box": {
+        "x": 0.068359375,
+        "y": 0.3671875,
+        "w": 0.8623046875,
+        "h": 0.043619791666666664
+      },
+      "note": "Find a place or add a new one search input.",
+      "snap": false,
+      "grid": "A3:J4"
+    },
+    {
+      "id": "ticket-notch-rule",
+      "kind": "chrome",
+      "box": {
+        "x": 0.0361328125,
+        "y": 0.416015625,
+        "w": 0.9287109375,
+        "h": 0.018880208333333332
+      },
+      "note": "A fine divider with a small semicircular notch at each end.",
+      "snap": false,
+      "grid": "A4:J4"
+    },
+    {
+      "id": "rating-label",
+      "kind": "text",
+      "box": {
+        "x": 0.068359375,
+        "y": 0.4401041666666667,
+        "w": 0.2099609375,
+        "h": 0.020182291666666668
+      },
+      "note": "Your rating.",
+      "snap": false,
+      "grid": "A4:C4"
+    },
+    {
+      "id": "rating-buttons",
+      "kind": "control",
+      "box": {
+        "x": 0.068359375,
+        "y": 0.4720052083333333,
+        "w": 0.86328125,
+        "h": 0.041015625
+      },
+      "note": "Ten numbered quick rating buttons, 8 selected in periwinkle.",
+      "snap": false,
+      "grid": "A4:J5"
+    },
+    {
+      "id": "rating-feedback",
+      "kind": "text",
+      "box": {
+        "x": 0.3603515625,
+        "y": 0.521484375,
+        "w": 0.4267578125,
+        "h": 0.01953125
+      },
+      "note": "8 / 10 · Would go again.",
+      "snap": false,
+      "grid": "D5:H5"
+    },
+    {
+      "id": "review-divider",
+      "kind": "chrome",
+      "box": {
+        "x": 0.0693359375,
+        "y": 0.5559895833333334,
+        "w": 0.8603515625,
+        "h": 0.001953125
+      },
+      "note": "Fine horizontal divider.",
+      "snap": false,
+      "grid": "A5:J5"
+    },
+    {
+      "id": "review-label",
+      "kind": "text",
+      "box": {
+        "x": 0.068359375,
+        "y": 0.5696614583333334,
+        "w": 0.234375,
+        "h": 0.022135416666666668
+      },
+      "note": "A little review.",
+      "snap": false,
+      "grid": "A5:D5"
+    },
+    {
+      "id": "review-input",
+      "kind": "control",
+      "box": {
+        "x": 0.068359375,
+        "y": 0.5989583333333334,
+        "w": 0.8623046875,
+        "h": 0.06640625
+      },
+      "note": "Optional review textarea.",
+      "snap": false,
+      "grid": "A5:J6"
+    },
+    {
+      "id": "optional-details",
+      "kind": "control",
+      "box": {
+        "x": 0.068359375,
+        "y": 0.6751302083333334,
+        "w": 0.5859375,
+        "h": 0.021484375
+      },
+      "note": "Expandable dishes, date and spending controls.",
+      "snap": false,
+      "grid": "A6:G6"
+    },
+    {
+      "id": "save-review",
+      "kind": "control",
+      "box": {
+        "x": 0.06640625,
+        "y": 0.7122395833333334,
+        "w": 0.8681640625,
+        "h": 0.045572916666666664
+      },
+      "note": "Periwinkle Save my review button with dark indigo text.",
+      "snap": false,
+      "grid": "A7:J7"
+    },
+    {
+      "id": "ticket-bottom",
+      "kind": "chrome",
+      "box": {
+        "x": 0.037109375,
+        "y": 0.7649739583333334,
+        "w": 0.9287109375,
+        "h": 0.011067708333333334
+      },
+      "note": "Rounded bottom edge of the ticket.",
+      "snap": false,
+      "grid": "A7:J7"
+    },
+    {
+      "id": "friends-heading",
+      "kind": "text",
+      "box": {
+        "x": 0.041015625,
+        "y": 0.7962239583333334,
+        "w": 0.41015625,
+        "h": 0.022786458333333332
+      },
+      "note": "Around the table.",
+      "snap": false,
+      "grid": "A7:E8"
+    },
+    {
+      "id": "friends-link",
+      "kind": "control",
+      "box": {
+        "x": 0.869140625,
+        "y": 0.7962239583333334,
+        "w": 0.0927734375,
+        "h": 0.024739583333333332
+      },
+      "note": "See all link.",
+      "snap": false,
+      "grid": "I7:J8"
+    },
+    {
+      "id": "friend-review",
+      "kind": "control",
+      "box": {
+        "x": 0.0439453125,
+        "y": 0.83203125,
+        "w": 0.91015625,
+        "h": 0.059244791666666664
+      },
+      "note": "One compact review entry with Nick’s avatar, restaurant, score, and review.",
+      "snap": false,
+      "grid": "A8:J8"
+    },
+    {
+      "id": "illustrative-label",
+      "kind": "text",
+      "box": {
+        "x": 0.044921875,
+        "y": 0.900390625,
+        "w": 0.216796875,
+        "h": 0.015625
+      },
+      "note": "Illustrative review label for mockup data only.",
+      "snap": false,
+      "grid": "A9:C9"
+    },
+    {
+      "id": "bottom-nav",
+      "kind": "chrome",
+      "box": {
+        "x": 0,
+        "y": 0.927734375,
+        "w": 1,
+        "h": 0.07161458333333333
+      },
+      "note": "Three navigation destinations Journal, Add review and Pick a place with outline icons.",
+      "snap": false,
+      "grid": "A9:J9"
+    }
+  ],
+  "allowUncovered": true
+}

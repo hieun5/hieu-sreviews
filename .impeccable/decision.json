@@ -1,0 +1,202 @@
+{
+  "title": "A simpler place for good food & friends",
+  "question": "Choose a starting direction. Every option keeps reviewer selection and makes logging a meal the main task. Mockup meals are illustrative.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "The meal ticket",
+      "kicker": "A PLAYFUL START",
+      "lineage": "The small ticket you fill in at a neighborhood lunch counter",
+      "thesis": "Choose your name, pick a place, leave a score. One small ticket, then back to your friends.",
+      "palette": [
+        "#FFF5D8",
+        "#DB4930",
+        "#30362C"
+      ],
+      "materials": [
+        "flat butter-yellow surfaces",
+        "quiet rules and a clear review ticket"
+      ],
+      "viewport": "A compact wordmark, five reviewer choices, one large meal form, and a small recent-review list.",
+      "risk": "The ticket has personality; too much decoration would slow down the simple form.",
+      "raised": [
+        {
+          "from": "Departure board",
+          "raise": "Keep reviewer, place, and score in a stable, immediately scannable order."
+        },
+        {
+          "from": "Record catalog",
+          "raise": "Give every screen one clear purpose and a consistent visual system."
+        },
+        {
+          "from": "Garden map",
+          "raise": "Let one cheerful color carry the page while the form stays calm."
+        },
+        {
+          "from": "Monochrome product site",
+          "raise": "Reserve the strongest accent for saving a review."
+        },
+        {
+          "from": "Vertical feed",
+          "raise": "Keep the current task dominant and its next action within reach."
+        },
+        {
+          "from": "Dance notation",
+          "raise": "Make the sequence easy to read without relying on explanatory text."
+        }
+      ],
+      "comp": ".impeccable/mocks/decision/meal-ticket.png"
+    },
+    {
+      "id": "model-pick",
+      "label": "The shared notebook",
+      "kicker": "MY PICK",
+      "lineage": "A shared notebook passed around the dinner table",
+      "thesis": "A warm food journal with a short review composer and your friends’ latest notes underneath.",
+      "palette": [
+        "#F8F6F0",
+        "#3F5846",
+        "#D9E6C6"
+      ],
+      "materials": [
+        "warm off-white ground",
+        "forest-green ink",
+        "lightly ruled review entries"
+      ],
+      "viewport": "A friendly greeting and reviewer strip above an open review composer, with a few recent notes below.",
+      "risk": "The journal layout is familiar; its character depends on thoughtful typography and small details.",
+      "comp": ".impeccable/mocks/decision/shared-notebook.png"
+    },
+    {
+      "id": "challenger-departure-board",
+      "label": "Departure board",
+      "verdict": "declined",
+      "thesis": "Fixed columns make meals scannable, but a station board feels impersonal and adds visual density.",
+      "case": "Fixed columns make meals scannable, but a station board feels impersonal and adds visual density.",
+      "kept": "Stable reading order.",
+      "palette": [
+        "#191A18",
+        "#40443D"
+      ],
+      "materials": [
+        "catalog reference"
+      ],
+      "viewport": "An alternate structure evaluated against fast meal logging.",
+      "risk": "Less familiar for a small group sharing food reviews."
+    },
+    {
+      "id": "challenger-record-catalog",
+      "label": "Record catalog",
+      "verdict": "declined",
+      "thesis": "Catalog numbers and coded labels obscure the simple task of reviewing dinner.",
+      "case": "Catalog numbers and coded labels obscure the simple task of reviewing dinner.",
+      "kept": "A consistent system across screens.",
+      "palette": [
+        "#171717",
+        "#40443D"
+      ],
+      "materials": [
+        "catalog reference"
+      ],
+      "viewport": "An alternate structure evaluated against fast meal logging.",
+      "risk": "Less familiar for a small group sharing food reviews."
+    },
+    {
+      "id": "challenger-garden-map",
+      "label": "Garden map",
+      "verdict": "declined",
+      "thesis": "Bright regions can feel welcoming, but animated map shapes compete with the review form.",
+      "case": "Bright regions can feel welcoming, but animated map shapes compete with the review form.",
+      "kept": "One joyful color with a calm task area.",
+      "palette": [
+        "#8ED462",
+        "#40443D"
+      ],
+      "materials": [
+        "catalog reference"
+      ],
+      "viewport": "An alternate structure evaluated against fast meal logging.",
+      "risk": "Less familiar for a small group sharing food reviews."
+    },
+    {
+      "id": "challenger-monochrome-marketing",
+      "label": "Monochrome product site",
+      "verdict": "declined",
+      "thesis": "A claim-and-screenshot sequence explains a product; friends need to use it immediately.",
+      "case": "A claim-and-screenshot sequence explains a product; friends need to use it immediately.",
+      "kept": "One clear primary action.",
+      "palette": [
+        "#F8F8F8",
+        "#40443D"
+      ],
+      "materials": [
+        "catalog reference"
+      ],
+      "viewport": "An alternate structure evaluated against fast meal logging.",
+      "risk": "Less familiar for a small group sharing food reviews."
+    },
+    {
+      "id": "challenger-vertical-feed",
+      "label": "Vertical media feed",
+      "verdict": "declined",
+      "thesis": "A photo-led full-screen feed depends on media the current journal does not collect.",
+      "case": "A photo-led full-screen feed depends on media the current journal does not collect.",
+      "kept": "One dominant task at a time.",
+      "palette": [
+        "#141414",
+        "#40443D"
+      ],
+      "materials": [
+        "catalog reference"
+      ],
+      "viewport": "An alternate structure evaluated against fast meal logging.",
+      "risk": "Less familiar for a small group sharing food reviews."
+    },
+    {
+      "id": "challenger-dance-score",
+      "label": "Dance notation",
+      "verdict": "declined",
+      "thesis": "An unfamiliar upward-reading score makes a quick meal entry harder to understand.",
+      "case": "An unfamiliar upward-reading score makes a quick meal entry harder to understand.",
+      "kept": "A visible task sequence.",
+      "palette": [
+        "#FAFAF7",
+        "#40443D"
+      ],
+      "materials": [
+        "catalog reference"
+      ],
+      "viewport": "An alternate structure evaluated against fast meal logging.",
+      "risk": "Less familiar for a small group sharing food reviews."
+    }
+  ],
+  "reroll": {
+    "registers": [
+      "safer",
+      "bolder"
+    ]
+  },
+  "steer": true,
+  "buildPath": {
+    "value": "comp",
+    "toggle": true
+  },
+  "canon": true,
+  "canonCard": {
+    "label": "Keep it clean",
+    "thesis": "A familiar, quiet app with a compact form, clear labels, and one green save button.",
+    "palette": [
+      "#FAFAF8",
+      "#252B27",
+      "#39654B"
+    ],
+    "materials": [
+      "near-white surfaces",
+      "fine gray dividers",
+      "restrained green controls"
+    ],
+    "viewport": "Reviewer chips, a simple review form, recent activity, and straightforward bottom navigation.",
+    "risk": "The least distinctive option, with personality carried mainly by the words and friends’ reviews.",
+    "comp": ".impeccable/mocks/decision/keep-it-clean.png"
+  }
+}

@@ -57,6 +57,25 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(result["results"], [])
         self.assertEqual(result["counts"]["rejectionReasons"], {"no-attendee-ratings": 1})
 
+    def test_cold_start_uses_group_ratings_without_inventing_personal_scores(self):
+        data = payload()
+        data["attendees"] = ["vinh", "mai-han"]
+        row = recommend(data)["results"][0]
+        self.assertEqual(row["preferenceScore"], "59.444444")
+        self.assertEqual(row["metrics"]["ratedAttendeeCount"], 0)
+        self.assertIsNone(row["metrics"]["observedMean"])
+        self.assertEqual(row["metrics"]["coverage"], "0")
+        self.assertIn("group-fallback", [item["code"] for item in row["explanations"]])
+
+    def test_partial_attendee_history_uses_group_fallback(self):
+        data = payload()
+        data["attendees"] = ["hieu", "vinh"]
+        row = recommend(data)["results"][0]
+        self.assertEqual(row["preferenceScore"], "77.222222")
+        self.assertEqual(row["metrics"]["observedMean"], "10")
+        self.assertEqual(row["metrics"]["ratedAttendeeCount"], 1)
+        self.assertIn("group-fallback", [item["code"] for item in row["explanations"]])
+
     def test_new_formula_smooths_cuisine_preferences_and_discloses_prior(self):
         data = payload("new")
         data["candidates"] = [candidate("new", restaurantId=None, provider="test", providerPlaceId="new")]

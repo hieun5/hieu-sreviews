@@ -47,7 +47,7 @@ export function AnalyticsChart({
   }));
   const tooltip = (
     <Tooltip
-      contentStyle={{ borderRadius: 10, borderColor: "#e6dfd2", fontSize: 12 }}
+      contentStyle={{ borderRadius: 10, borderColor: "#dfdfe5", fontSize: 12 }}
       formatter={(_value, _name, item) => [
         formatRating(item.payload.exactAverage),
         "Average rating",
@@ -57,7 +57,7 @@ export function AnalyticsChart({
   const yAxis = (
     <YAxis
       domain={[0, 10]}
-      tick={{ fill: "#71695f", fontSize: 10 }}
+      tick={{ fill: "#676773", fontSize: 10 }}
       tickLine={false}
       axisLine={false}
     />
@@ -70,10 +70,10 @@ export function AnalyticsChart({
             data={chartData}
             margin={{ top: 20, right: 20, left: -25, bottom: 12 }}
           >
-            <CartesianGrid stroke="#e9e2d7" vertical={false} />
+            <CartesianGrid stroke="#e6e5ee" vertical={false} />
             <XAxis
               dataKey="date"
-              tick={{ fill: "#71695f", fontSize: 10 }}
+              tick={{ fill: "#676773", fontSize: 10 }}
               tickLine={false}
               axisLine={false}
               tickFormatter={(value: string) => value.slice(5)}
@@ -84,9 +84,9 @@ export function AnalyticsChart({
             <Line
               dataKey="average"
               type="linear"
-              stroke="#cf5339"
+              stroke="#747fc5"
               strokeWidth={2.5}
-              dot={{ fill: "#cf5339", r: 4.5, strokeWidth: 0 }}
+              dot={{ fill: "#747fc5", r: 4.5, strokeWidth: 0 }}
               connectNulls={false}
               isAnimationActive={false}
             />
@@ -96,10 +96,10 @@ export function AnalyticsChart({
             data={chartData}
             margin={{ top: 20, right: 15, left: -25, bottom: 12 }}
           >
-            <CartesianGrid stroke="#e9e2d7" vertical={false} />
+            <CartesianGrid stroke="#e6e5ee" vertical={false} />
             <XAxis
               dataKey="name"
-              tick={{ fill: "#71695f", fontSize: 10 }}
+              tick={{ fill: "#676773", fontSize: 10 }}
               tickLine={false}
               axisLine={false}
               tickFormatter={(value: string) =>
@@ -111,7 +111,7 @@ export function AnalyticsChart({
             {tooltip}
             <Bar
               dataKey="average"
-              fill={kind === "cuisines" ? "#a58ac7" : "#ec9770"}
+              fill={kind === "cuisines" ? "#b6a0d7" : "#a5b7e7"}
               radius={[9, 9, 0, 0]}
               maxBarSize={42}
               isAnimationActive={false}

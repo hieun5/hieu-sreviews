@@ -35,6 +35,21 @@ export async function selectProfile(data: FormData) {
   redirect("/");
 }
 
+// Profile selection is the journal’s existing shared identity model. This
+// variant stays on the current screen so switching never discards a draft.
+export async function switchReviewProfile(profileId: string) {
+  const profile = findProfile(profileId);
+  if (!profile) return { error: "Choose one of the friends below." };
+  (await cookies()).set(PROFILE_COOKIE, profile.id, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+  });
+  return { profileId: profile.id };
+}
+
 export async function createRestaurant(
   _previous: FormState,
   data: FormData,

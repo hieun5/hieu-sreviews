@@ -2,8 +2,11 @@ import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { loadEnvFile } from "node:process";
 
 const root = fileURLToPath(new URL(".", import.meta.url));
+const localEnv = path.resolve(root, "..", ".env.local");
+if (process.argv[2] !== "test" && existsSync(localEnv)) loadEnvFile(localEnv);
 const local = path.join(
   root,
   ".venv",

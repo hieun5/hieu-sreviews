@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeftRight } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Avatar } from "@/components/avatar";
 import { Navigation } from "@/components/navigation";
 import { Brand } from "@/components/ui";
@@ -21,17 +21,19 @@ export default async function JournalLayout({
           <div className="topbar-inner">
             <Brand />
             <Navigation />
-            <Link href="/profiles" className="profile-switch">
-              <Avatar profile={profile} size={32} />
-              <span>
-                <span className="block text-xs font-semibold">
-                  {profile.name}
+            <div className="topbar-actions">
+              <Link
+                href="/profiles"
+                className="profile-switch"
+                aria-label={`Switch Profile · ${profile.name}`}
+              >
+                <Avatar profile={profile} size={32} />
+                <span>
+                  <span className="profile-switch-name">{profile.name}</span>
                 </span>
-                <span className="flex items-center gap-1 text-[10px] text-muted">
-                  Switch Profile <ArrowLeftRight size={10} aria-hidden="true" />
-                </span>
-              </span>
-            </Link>
+                <ChevronDown size={14} aria-hidden="true" />
+              </Link>
+            </div>
           </div>
         </header>
         <main id="main-content" className="page-content">

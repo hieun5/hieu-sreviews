@@ -6,7 +6,7 @@ from .explanations import explain
 from .filters import rejection
 from .validation import validate
 
-VERSION = "recommendations-v1"
+VERSION = "recommendations-v2"
 
 
 def as_text(value):
@@ -25,15 +25,20 @@ def preferences(payload):
 
 
 def score_favorite(candidate, payload, rated_profiles):
-    values = [Decimal(row["rating"]) for row in sorted(payload["ratings"], key=lambda item: (item["profileId"], item["restaurantId"])) if row["restaurantId"] == candidate["restaurantId"] and row["profileId"] in payload["attendees"]]
-    if not values:
+    ratings = [row for row in sorted(payload["ratings"], key=lambda item: (item["profileId"], item["restaurantId"])) if row["restaurantId"] == candidate["restaurantId"]]
+    if not ratings:
         return None
-    mean = sum(values) / len(values)
+    values = [Decimal(row["rating"]) for row in ratings if row["profileId"] in payload["attendees"]]
+    group_mean = sum(Decimal(row["rating"]) for row in ratings) / len(ratings)
+    missing_count = len(payload["attendees"]) - len(values)
+    # Group evidence fills missing preferences, never stored as personal ratings.
+    mean = (sum(values) + group_mean * missing_count) / len(payload["attendees"])
+    observed_mean = sum(values) / len(values) if values else None
     coverage = Decimal(len(values)) / len(payload["attendees"])
-    deviation = (sum((value - mean) ** 2 for value in values) / len(values)).sqrt() if len(values) >= 2 else None
+    deviation = (sum((value - observed_mean) ** 2 for value in values) / len(values)).sqrt() if len(values) >= 2 else None
     agreement = 1 - deviation / Decimal("4.5") if deviation is not None else Decimal("0.5")
     score = 70 * (mean - 1) / 9 + 20 * coverage + 10 * agreement
-    return score, {"coverage": as_text(coverage), "observedMean": as_text(mean), "disagreement": as_text(deviation), "cuisineAffinity": None, "ratedAttendeeCount": len(values), "preferenceAttendeeCount": 0, "coldStartAttendeeCount": len(set(payload["attendees"]) - rated_profiles), "metadataKnownCount": 0}
+    return score, {"coverage": as_text(coverage), "observedMean": as_text(observed_mean), "disagreement": as_text(deviation), "cuisineAffinity": None, "ratedAttendeeCount": len(values), "preferenceAttendeeCount": 0, "coldStartAttendeeCount": len(set(payload["attendees"]) - rated_profiles), "metadataKnownCount": 0}
 
 
 def score_new(candidate, payload, cuisine_preferences, rated_profiles):

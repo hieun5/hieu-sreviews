@@ -6,10 +6,6 @@ import {
 } from "@/contracts/reporting";
 import { apiErrorSchema } from "@/contracts/journal";
 import { AnalyticsChart } from "@/components/analytics-charts";
-import {
-  AnalyticsFiltersForm,
-  type AnalyticsFilterValues,
-} from "@/components/analytics-filters";
 import { Rating } from "@/components/ui";
 import { formatDate } from "@/lib/dates";
 import { formatRating } from "@/lib/ratings";
@@ -22,48 +18,21 @@ function queryValue(params: SearchParams, key: string) {
   return typeof params[key] === "string" ? params[key] : "";
 }
 
-function scopeHref(
-  values: AnalyticsFilterValues,
-  scope: "group" | "personal",
-  search: string,
-) {
-  const params = new URLSearchParams();
-  params.set("view", scope);
-  if (search) params.set("q", search);
-  if (scope === "personal") params.set("profile", values.profile);
-  if (values.restaurant) params.set("restaurant", values.restaurant);
-  if (values.cuisine) params.set("cuisine", values.cuisine);
-  if (values.start) params.set("start", values.start);
-  if (values.end) params.set("end", values.end);
-  return `/?${params.toString()}#dashboard-analytics`;
-}
-
 export async function DashboardAnalytics({
   searchParams,
   selectedProfileId,
-  today,
-  search,
 }: {
   searchParams: SearchParams;
   selectedProfileId: string;
-  today: string;
-  search: string;
 }) {
-  const values: AnalyticsFilterValues = {
-    view: queryValue(searchParams, "view") || "group",
-    profile: queryValue(searchParams, "profile") || selectedProfileId,
-    restaurant: queryValue(searchParams, "restaurant"),
-    cuisine: queryValue(searchParams, "cuisine"),
-    start: queryValue(searchParams, "start"),
-    end: queryValue(searchParams, "end"),
+  const values = {
+    view:
+      queryValue(searchParams, "view") === "personal" ? "personal" : "group",
+    profile: selectedProfileId,
   };
   const rawQuery = {
     view: values.view,
-    ...(values.view === "personal" ? { profileId: values.profile } : {}),
-    ...(values.restaurant ? { restaurantId: values.restaurant } : {}),
-    ...(values.cuisine ? { cuisine: values.cuisine } : {}),
-    ...(values.start ? { start: values.start } : {}),
-    ...(values.end ? { end: values.end } : {}),
+    ...(values.view === "personal" ? { profileId: selectedProfileId } : {}),
   };
   const query = analyticsQuerySchema.safeParse(rawQuery);
   let data: AnalyticsResponse["data"] | null = null;
@@ -82,12 +51,10 @@ export async function DashboardAnalytics({
         : "Analytics could not be loaded.";
     }
   } else {
-    errorMessage = "Check the analytics filters and try again.";
+    errorMessage = "Food stats could not be loaded. Please try again.";
   }
 
   const profiles = data?.filterOptions.profiles ?? friendProfiles;
-  const places = data?.filterOptions.restaurants ?? [];
-  const cuisines = data?.filterOptions.cuisines ?? [];
   const viewedProfile = profiles.find(({ id }) => id === values.profile)?.name;
 
   return (
@@ -99,7 +66,7 @@ export async function DashboardAnalytics({
     >
       <div className="dashboard-analytics-header">
         <div>
-          <p className="muted mb-1 text-[11px] uppercase tracking-wider">
+          <p className="muted mb-1 text-xs uppercase tracking-wider">
             {values.view === "group" ? "Group" : (viewedProfile ?? "Personal")}
           </p>
           <h2 id="analytics-title" className="section-title">
@@ -108,33 +75,19 @@ export async function DashboardAnalytics({
         </div>
         <div className="analytics-scope" aria-label="Analytics scope">
           <Link
-            href={scopeHref(values, "group", search)}
+            href={"/analytics"}
             aria-current={values.view === "group" ? "page" : undefined}
           >
             Group
           </Link>
           <Link
-            href={scopeHref(values, "personal", search)}
+            href={"/analytics?view=personal"}
             aria-current={values.view === "personal" ? "page" : undefined}
           >
             Personal
           </Link>
         </div>
       </div>
-
-      <details className="dashboard-filter-details">
-        <summary>Filters</summary>
-        <AnalyticsFiltersForm
-          key={JSON.stringify(values)}
-          values={values}
-          profiles={profiles.map(({ id, name }) => ({ id, name }))}
-          places={places}
-          cuisines={cuisines}
-          today={today}
-          action="/"
-          search={search}
-        />
-      </details>
 
       {errorMessage ? (
         <p className="notice notice-error mb-0" role="alert">
@@ -145,7 +98,7 @@ export async function DashboardAnalytics({
           <div className="dashboard-analytics-summary">
             <div className="analytics-average">
               <Rating value={data.currentAverage} />
-              <p className="muted mb-0 mt-1 text-[11px]">
+              <p className="muted mb-0 mt-1 text-xs">
                 Current average · {data.counts.currentScoreCount} scores
               </p>
             </div>
@@ -168,7 +121,6 @@ export async function DashboardAnalytics({
           <section className="dashboard-analytics-section">
             <div className="dashboard-section-heading">
               <h3>Top places</h3>
-              <span>Current scores / 10</span>
             </div>
             {data.leaderboard.length ? (
               <ol className="analytics-rank-list">
@@ -182,9 +134,11 @@ export async function DashboardAnalytics({
                       >
                         {place.name}
                       </Link>
-                      <p className="muted mb-0 text-[10px]">
-                        {place.reviewerCount} reviewers · {place.visitCount}{" "}
-                        visits
+                      <p className="muted mb-0 text-xs">
+                        {place.reviewerCount}{" "}
+                        {place.reviewerCount === 1 ? "reviewer" : "reviewers"} ·{" "}
+                        {place.visitCount}{" "}
+                        {place.visitCount === 1 ? "visit" : "visits"}
                       </p>
                     </div>
                     <span className="analytics-score">
@@ -229,7 +183,7 @@ export async function DashboardAnalytics({
               </p>
               <AnalyticsChart kind="timeline" data={data.timeline.slice(-10)} />
               {data.timeline.length ? (
-                <p className="muted mb-4 text-[10px]">
+                <p className="muted mb-4 text-xs">
                   {formatDate(data.timeline[0].date)} to{" "}
                   {formatDate(data.timeline[data.timeline.length - 1].date)} ·{" "}
                   {data.timeline.reduce(
@@ -239,9 +193,7 @@ export async function DashboardAnalytics({
                   visits
                 </p>
               ) : null}
-              <p className="dashboard-section-caption">
-                Friend comparison · current scores
-              </p>
+              <p className="dashboard-section-caption">Friend comparison</p>
               <ul className="analytics-cuisine-list">
                 {data.comparison.map((friend) => (
                   <li key={friend.profileId}>
@@ -249,30 +201,15 @@ export async function DashboardAnalytics({
                     <span className="text-right">
                       <strong>{formatRating(friend.average)}</strong>
                       <small className="block text-muted">
-                        {friend.placeCount} places · {friend.visitCount} visits
+                        {friend.placeCount}{" "}
+                        {friend.placeCount === 1 ? "place" : "places"} ·{" "}
+                        {friend.visitCount}{" "}
+                        {friend.visitCount === 1 ? "visit" : "visits"}
                       </small>
                     </span>
                   </li>
                 ))}
               </ul>
-              <p className="dashboard-section-caption mt-4">Spending · USD</p>
-              {data.spending.recordedVisitCount ? (
-                <p className="muted mb-0 text-xs">
-                  ${(data.spending.totalCents! / 100).toFixed(2)} total · $
-                  {(data.spending.averageCents! / 100).toFixed(2)} per recorded
-                  visit · {data.spending.recordedVisitCount} visits recorded
-                </p>
-              ) : (
-                <p className="muted mb-0 text-xs">No spending recorded.</p>
-              )}
-              <p className="dashboard-section-caption mt-4">
-                Recommendation activity
-              </p>
-              <p className="muted mb-0 text-xs">
-                {data.recommendationActivity.selectedCount} selected ·{" "}
-                {data.recommendationActivity.dismissedCount} dismissed ·{" "}
-                {data.recommendationActivity.linkedVisitCount} linked visits
-              </p>
             </div>
           </details>
         </>

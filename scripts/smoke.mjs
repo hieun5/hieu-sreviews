@@ -30,10 +30,9 @@ assert.equal(selection.status, 200);
 const html = await selection.text();
 for (const name of ["Hieu", "Ky-An", "Vinh", "Nick", "Mai-Han"])
   assert.ok(html.includes(name));
-assert.ok(html.includes("not secured accounts"));
-console.log(
-  "PASS: all configured profiles and shared-selection explanation render",
-);
+assert.ok(!html.includes("not secured accounts"));
+assert.ok(!html.includes("Bring your appetite"));
+console.log("PASS: all five profile choices render without introductory copy");
 
 const actionName = html.match(/name="(\$ACTION_ID_[^"]+)"/)?.[1];
 assert.ok(
@@ -55,7 +54,7 @@ console.log(
   "PASS: selecting Hieu sets the production cookie and redirects home",
 );
 
-for (const path of ["/", "/places", "/analytics", "/places/new"]) {
+for (const path of ["/", "/journal", "/places", "/analytics", "/places/new"]) {
   const response = await request(path, {
     headers: { cookie: "journal_profile=hieu" },
   });
@@ -82,5 +81,9 @@ assert.match(
 const homeAfterSwitch = await request("/", {
   headers: { cookie: "journal_profile=mai-han" },
 });
-assert.ok((await homeAfterSwitch.text()).includes("Hey, Mai-Han"));
+const switchedHome = await homeAfterSwitch.text();
+assert.ok(switchedHome.includes("Reviewing as Mai-Han"));
+assert.ok(switchedHome.includes("What did you eat?"));
+assert.ok(switchedHome.includes("Save my review"));
+assert.ok(!switchedHome.includes("Good meals. Honest opinions. Just us."));
 console.log("PASS: switching to Mai-Han updates the cookie and home content");

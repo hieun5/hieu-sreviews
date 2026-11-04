@@ -1,6 +1,6 @@
 ﻿# Recommendation backend
 
-Implemented October 18, 2026. Shared JSON schemas are in `src/contracts/recommendations.ts`. The UI is not wired to these APIs. Recommendations are deterministic preference indices, not AI-generated reviews or predicted restaurant ratings.
+Implemented October 18, 2026. Shared JSON schemas are in `src/contracts/recommendations.ts`. The UI uses these APIs; the current saved-place flow and v2 scoring changes are documented below. Recommendations are deterministic preference indices, not AI-generated reviews or predicted restaurant ratings.
 
 The user confirmed that **Something New excludes places already logged by anyone in the group. Our Favorites can recommend revisits.** A saved place with no visits is not considered logged.
 
@@ -82,6 +82,16 @@ With no history and only cuisine metadata, this is 41.25; the explanation explic
 Every result includes `scoreKind: preference-index` at run/projection level, range 0â€“100, algorithmVersion, decimal-string preferenceScore, metrics and explanations. Metrics distinguish observedMean (Favorites only), disagreement (requires two votes), cuisineAffinity (New only), coverage, evidence counts, coldStartAttendeeCount and metadataKnownCount. Missing metrics stay null. Explanations use numeric evidence and generic text, never stored provider listing text.
 
 Counts include unique input candidates, eligible before the result limit, returned ranked count, excluded count and rejection reasons. A candidate gets one rejection reason, in filter priority order. `eligibleCount > rankedCount` indicates truncation; excludedCount does not include eligible places omitted by the result limit.
+
+## November 3, 2026 saved-place recommendations v2
+
+The current UI requests Favorites only, no optional filters, and a limit of ten. It keeps attendee selection and links saved results to place details. Past picks and per-result feedback controls are not exposed in the current UI; their existing API records remain available. Discovery backend endpoints remain available for compatibility but have no new-run UI entry.
+
+`recommendations-v2` retains the v1 Favorites scoring weights and observed-coverage/agreement terms. For each candidate, calculate its current group mean from actual latest-per-friend ratings. Each selected attendee contributes their own current score when present, otherwise that candidate's group mean. The effective mean is `(sum(observed attendee scores) + groupMean * missingAttendeeCount) / attendeeCount`. Candidates with no group ratings are still excluded. Actual attendee coverage, observed mean and disagreement remain based only on observed attendee scores; zero-observation means remain null. `group-fallback` explains when group evidence was used. No imputed rating is written to visits. Fully observed attendee groups retain the previous formula. New-mode scoring is unchanged.
+
+Live scorer responses require v2. Persisted run responses accept v1 and v2, preserving old histories. TypeScript and Python versions must be released together. No migration is required.
+
+Local `npm run dev:recommender` now loads the ignored root `.env.local` automatically before spawning Python. Tests do not load it. It uses the existing virtual-environment discovery and localhost-only authenticated service. The local environment is configured for port 8001; no credential values belong in documentation or source.
 
 ## Persistence and feedback
 

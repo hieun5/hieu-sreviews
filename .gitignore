@@ -5,6 +5,13 @@ coverage/
 .npm-cache/
 .env*
 !.env.example
+
+# Local design-tool caches and intermediate renders
+.impeccable/build/
+.impeccable/hook.cache.json
+.impeccable/questions/
+.impeccable/review/diff/
+.impeccable/seed-roll.txt
 .vercel/
 *.tsbuildinfo
 next-env.d.ts
